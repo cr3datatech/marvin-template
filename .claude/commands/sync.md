@@ -1,10 +1,10 @@
 ---
-description: Sync updates from the MARVIN template
+description: Sync updates from the Groot template
 ---
 
 # /sync - Get Updates
 
-Pull new features and commands from the MARVIN template into your workspace.
+Pull new features and commands from the Groot template into your workspace.
 
 ## Instructions
 
@@ -16,7 +16,7 @@ cat .marvin-source
 ```
 
 If this file doesn't exist, tell the user:
-> "I can't find your template source. This usually means you set up MARVIN manually. Would you like to tell me where your template folder is?"
+> "I can't find your template source. This usually means you set up Groot manually. Would you like to tell me where your template folder is?"
 
 ### 2. Check What's New
 
@@ -80,4 +80,4 @@ If there are conflicts, explain:
 ### 7. Finish
 
 After syncing:
-> "All done! You now have the latest MARVIN features. Type `/help` to see what's available."
+> "All done! You now have the latest Groot features. Type `/help` to see what's available."

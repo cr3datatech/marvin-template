@@ -1,33 +1,21 @@
 # Goals
 
-<!-- SETUP NOT COMPLETE: This file has placeholder content -->
-<!-- MARVIN will update this during setup -->
-
-Last updated: Not yet configured
+Last updated: 2026-03-16
 
 ---
 
 ## Work Goals
 
-Goals related to your job - KPIs, projects, professional development, team goals.
-
-*Examples:*
-- Hit Q1 revenue target
-- Ship the new feature by March
-- Get promoted to senior
-- Improve team velocity by 20%
+- Get AWS AI Developer Professional certified
+- Get Azure AI Architect certified
+- Grow cloud advisory practice (AWS → Azure expansion)
+- Keep Tourno moving forward
 
 ---
 
 ## Personal Goals
 
-Goals for life outside work - health, hobbies, relationships, personal growth.
-
-*Examples:*
-- Walk 10k steps daily
-- Write a blog post every week
-- Read 24 books this year
-- Learn to play guitar
+- (Add yours anytime — just say "add a personal goal")
 
 ---
 
@@ -35,8 +23,11 @@ Goals for life outside work - health, hobbies, relationships, personal growth.
 
 | Goal | Type | Status | Notes |
 |------|------|--------|-------|
-| Complete MARVIN setup | - | In progress | |
+| AWS AI Developer Professional | Work | In progress | |
+| Azure AI Architect | Work | In progress | |
+| Tourno progress | Work | Active | |
+| Azure expansion | Work | In progress | |
 
 ---
 
-*Tell MARVIN about your goals during setup, and they'll appear here. You can update these anytime - just say "let's update my goals."*
+*Update anytime — just say "let's update my goals."*

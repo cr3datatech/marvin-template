@@ -12,7 +12,7 @@ What this agent is responsible for. Be specific about the domain and scope.
 
 ## When to Spawn
 
-MARVIN should spawn this agent when:
+Groot should spawn this agent when:
 - Condition 1
 - Condition 2
 - User explicitly requests this type of work
@@ -43,7 +43,7 @@ What the user can expect as a result:
 
 ```
 User: "I need to research competitors in the API space"
-MARVIN: [spawns research-agent]
+Groot: [spawns research-agent]
 Agent: [performs research, saves to research/output/, reports back]
 ```
 

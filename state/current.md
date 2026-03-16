@@ -1,15 +1,13 @@
 # Current State
 
-<!-- SETUP NOT COMPLETE: This file has placeholder content -->
-<!-- MARVIN will update this during setup -->
-
-Last updated: Not yet configured
+Last updated: 2026-03-16
 
 ## Active Priorities
 
-1. [Complete MARVIN setup first]
-2. [Your priorities will go here]
-3. [After setup is complete]
+1. AWS AI Developer Professional cert
+2. Azure AI Architect cert
+3. Tourno — football tournament web app
+4. Cloud advisory expansion to Azure
 
 ## Open Threads
 
@@ -17,8 +15,8 @@ Last updated: Not yet configured
 
 ## Recent Context
 
-- Awaiting initial setup
+- Just set up Groot
 
 ---
 
-*This file is updated by MARVIN at the end of each session.*
+*This file is updated by Groot at the end of each session.*

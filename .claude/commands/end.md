@@ -1,8 +1,8 @@
 ---
-description: End MARVIN session - save context and state
+description: End Groot session - save context and state
 ---
 
-# /end - End MARVIN Session
+# /end - End Groot Session
 
 Wrap up the current session and save context for continuity.
 

@@ -1,11 +1,11 @@
 ---
 name: skill-creator
-description: Create new MARVIN capabilities on request. Triggers on "give yourself the ability to X" or "create a skill for Y"
+description: Create new Groot capabilities on request. Triggers on "give yourself the ability to X" or "create a skill for Y"
 ---
 
 # Skill Creator
 
-Create new MARVIN capabilities based on user requests. Determines whether the request is best served by a command, agent, or skill, and creates the appropriate file.
+Create new Groot capabilities based on user requests. Determines whether the request is best served by a command, agent, or skill, and creates the appropriate file.
 
 ## When to Use
 
@@ -13,7 +13,7 @@ Claude Code should invoke this skill when it detects:
 - "Give yourself the ability to..."
 - "Create a skill for..."
 - "Add a workflow for..."
-- "I want MARVIN to be able to..."
+- "I want Groot to be able to..."
 - "Make a command for..."
 - "Add an agent for..."
 
@@ -31,12 +31,12 @@ Clarify:
 | Type | When to Use | Location |
 |------|-------------|----------|
 | **Command** | User-triggered workflow with a slash command (e.g., `/review`) | `.claude/commands/{name}.md` |
-| **Agent** | Autonomous delegated work MARVIN spawns via Task tool | `.claude/agents/{name}.md` |
+| **Agent** | Autonomous delegated work Groot spawns via Task tool | `.claude/agents/{name}.md` |
 | **Skill** | Contextual capability that activates when relevant | `.claude/skills/{name}.md` |
 
 **Decision guide:**
 - Does the user explicitly invoke it? → **Command**
-- Does MARVIN delegate a chunk of work to it? → **Agent**
+- Does Groot delegate a chunk of work to it? → **Agent**
 - Does it activate based on context/patterns? → **Skill**
 
 ### Step 3: Create the File

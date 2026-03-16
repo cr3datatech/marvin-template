@@ -5,7 +5,7 @@ description: Check integration health and workspace status. Tests each configure
 
 # Status Check
 
-Check integration health and MARVIN workspace status at a glance.
+Check integration health and Groot workspace status at a glance.
 
 ## When to Use
 
@@ -74,7 +74,7 @@ Format the output as a clear status dashboard.
 ## Output Format
 
 ```
-## MARVIN Status
+## Groot Status
 
 ### Integrations
 

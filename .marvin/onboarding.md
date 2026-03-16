@@ -1,6 +1,6 @@
-# MARVIN Onboarding Guide
+# Groot Onboarding Guide
 
-This guide walks new users through setting up MARVIN. Read by MARVIN when setup is not yet complete.
+This guide walks new users through setting up Groot. Read by Groot when setup is not yet complete.
 
 ---
 
@@ -12,7 +12,7 @@ Instead, for Atlassian and MS365:
 1. Run `claude mcp add` commands directly (see Step 7)
 2. User must restart Claude Code for new MCPs to appear
 3. After restart, user types `/mcp` to authenticate
-4. MARVIN detects pending auth state and guides them through it
+4. Groot detects pending auth state and guides them through it
 
 ---
 
@@ -162,7 +162,7 @@ Be friendly and patient - assume the user is not technical.
 ### Step 1: Welcome
 
 Say something like:
-> "Welcome! I'm MARVIN, and I'll be your AI Chief of Staff. Let me help you get set up. This will take about 10 minutes, and I'll walk you through everything."
+> "Welcome! I'm Groot, and I'll be your AI Chief of Staff. Let me help you get set up. This will take about 10 minutes, and I'll walk you through everything."
 
 ### Step 2: Gather Basic Info
 
@@ -199,13 +199,13 @@ Ask these questions one at a time, waiting for answers:
 
 ### Step 3: Create Your Workspace
 
-This is where we set up the user's personal MARVIN workspace, separate from the template.
+This is where we set up the user's personal Groot workspace, separate from the template.
 
 Explain:
-> "Now I'm going to create your personal MARVIN workspace. This is where all your data, goals, and session logs will live. The template you downloaded will stay separate so you can get updates later."
+> "Now I'm going to create your personal Groot workspace. This is where all your data, goals, and session logs will live. The template you downloaded will stay separate so you can get updates later."
 
-Ask where they'd like their MARVIN folder:
-> "Where would you like your MARVIN folder to live? I'd suggest somewhere easy to find:
+Ask where they'd like their Groot folder:
+> "Where would you like your Groot folder to live? I'd suggest somewhere easy to find:
 > - **Desktop** - Right there when you need it
 > - **Documents** - Tucked away but organized
 >
@@ -213,7 +213,7 @@ Ask where they'd like their MARVIN folder:
 
 **After they respond, explain what's about to happen:**
 > "Great! I'm going to run a few quick setup commands to create your workspace. You'll see some permission prompts pop up - just click **Accept** for each one. This is totally normal - I'm just:
-> - Creating your MARVIN folder
+> - Creating your Groot folder
 > - Copying over the necessary files (commands, skills, etc.)
 > - Setting up your personal state files
 >
@@ -243,7 +243,7 @@ echo "$(pwd)" > ~/marvin/.marvin-source
 ```
 
 **What gets copied:**
-- `.claude/` - MARVIN capabilities (commands, agents, skills)
+- `.claude/` - Groot capabilities (commands, agents, skills)
 - `.claude/commands/` - Slash commands (user can add their own)
 - `.claude/agents/` - Subagent definitions (user can add their own)
 - `.claude/skills/` - Reusable skills (user can add their own)
@@ -256,18 +256,18 @@ echo "$(pwd)" > ~/marvin/.marvin-source
 - `sessions/`, `reports/`, `content/` - Created fresh in workspace
 
 Tell the user:
-> "I've created your MARVIN workspace at {path}. This is your personal space - all your data stays here. The template folder stays separate so you can get updates when new features are added."
+> "I've created your Groot workspace at {path}. This is your personal space - all your data stays here. The template folder stays separate so you can get updates when new features are added."
 
 ### Step 4: Set Up Git (Optional)
 
-Ask: "Would you like to track your MARVIN workspace with git? This lets you back up your data and optionally sync it to GitHub."
+Ask: "Would you like to track your Groot workspace with git? This lets you back up your data and optionally sync it to GitHub."
 
 If yes:
 ```bash
 cd ~/marvin
 git init
 git add .
-git commit -m "Initial MARVIN setup"
+git commit -m "Initial Groot setup"
 ```
 
 Then ask: "Do you want to connect this to a GitHub repository? If so, create a **private** repository on GitHub and paste the URL here. Or press Enter to skip - you can always add this later."
@@ -320,7 +320,7 @@ Last updated: {TODAY'S DATE}
 
 ## Active Priorities
 
-1. Complete MARVIN setup
+1. Complete Groot setup
 2. {Their first priority if they mentioned one}
 
 ## Open Threads
@@ -329,7 +329,7 @@ Last updated: {TODAY'S DATE}
 
 ## Recent Context
 
-- Just set up MARVIN!
+- Just set up Groot!
 ```
 
 **Update `~/marvin/CLAUDE.md`** - Replace the "User Profile" section with their actual info:
@@ -359,7 +359,7 @@ If yes, **set it up directly** (don't ask them to run a script):
 4. If not, append this function:
 
 ```bash
-# MARVIN - AI Chief of Staff
+# Groot - AI Chief of Staff
 marvin() {
     echo -e '\e[1;33m███╗   ███╗    █████╗    ██████╗   ██╗   ██╗  ██╗   ███╗   ██╗   \e[0m'
     echo -e '\e[1;33m████╗ ████║   ██╔══██╗   ██╔══██╗  ██║   ██║  ██║   ████╗  ██║   \e[0m'
@@ -376,11 +376,11 @@ Replace `{WORKSPACE_PATH}` with their actual workspace path (e.g., `~/marvin`).
 
 5. Tell them: "Done! After we finish here, open a new terminal and you can start me anytime by typing `marvin`."
 
-If they skip: "No worries! You can always navigate to your MARVIN folder and run `claude` to start me."
+If they skip: "No worries! You can always navigate to your Groot folder and run `claude` to start me."
 
 ### Step 7: Explain the Daily Workflow
 
-Explain how a typical day with MARVIN works:
+Explain how a typical day with Groot works:
 
 > "Here's how we'll work together each day:"
 >
@@ -408,7 +408,7 @@ Then show the full command list:
 
 ### Step 8: Explain How I Work
 
-This is important - set expectations about MARVIN's personality:
+This is important - set expectations about Groot's personality:
 
 > "One more thing: I'm not just here to agree with everything you say. When you're brainstorming or making decisions, I'll:
 > - Help you explore different options
@@ -421,7 +421,7 @@ This is important - set expectations about MARVIN's personality:
 ### Step 9: Connect Your Tools (Optional)
 
 Tell them about the template first:
-> "One more thing before we wrap up: **Keep the template folder you downloaded.** That's where I get updates from. When new features or integrations are added, you can run `/sync` to pull them into your workspace. Don't worry - your personal data is safe in your MARVIN folder and won't be overwritten."
+> "One more thing before we wrap up: **Keep the template folder you downloaded.** That's where I get updates from. When new features or integrations are added, you can run `/sync` to pull them into your workspace. Don't worry - your personal data is safe in your Groot folder and won't be overwritten."
 
 Then ask about integrations:
 > "I can connect to several tools to help you out. Which of these do you use?"
@@ -435,7 +435,7 @@ Then ask about integrations:
 
 **If they say no or skip:**
 
-> "No problem! We can always add these later. Just ask me anytime - 'Hey MARVIN, help me connect to Jira' - and I'll walk you through it."
+> "No problem! We can always add these later. Just ask me anytime - 'Hey Groot, help me connect to Jira' - and I'll walk you through it."
 
 Move directly to Step 10.
 
@@ -535,7 +535,7 @@ After adding integrations, create a file to track what needs `/mcp` authenticati
 # In the user's workspace (e.g., ~/marvin)
 cat > .onboarding-pending-auth << 'EOF'
 # Integrations pending authentication
-# MARVIN will read this file on next startup and guide you through auth
+# Groot will read this file on next startup and guide you through auth
 
 atlassian
 ms365
@@ -556,7 +556,7 @@ After adding integrations (and creating the pending auth file if needed), contin
 
 **Tell them we're done and need to restart:**
 
-> "That's everything! Your MARVIN is all set up."
+> "That's everything! Your Groot is all set up."
 
 **If they set up integrations:**
 > "I've added your integrations, but I need to restart to see them. Here's what to do:
@@ -590,7 +590,7 @@ Delete the `.onboarding-pending-auth` file if it exists, then give them their fi
 
 ## After Onboarding
 
-Once setup is complete, MARVIN should:
+Once setup is complete, Groot should:
 1. Never show this onboarding flow again
 2. Use the normal `/start` briefing flow
 3. Reference CLAUDE.md for the user's profile and preferences
@@ -598,7 +598,7 @@ Once setup is complete, MARVIN should:
 
 ## Getting Updates (/sync)
 
-When the user runs `/sync`, MARVIN should:
+When the user runs `/sync`, Groot should:
 1. Read `.marvin-source` to find the template directory
 2. Check for new/updated files in the template's `.claude/commands/`, `.claude/agents/`, and `.claude/skills/`
 3. Copy new files to the user's workspace
