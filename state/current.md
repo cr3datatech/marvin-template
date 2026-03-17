@@ -4,10 +4,20 @@ Last updated: 2026-03-16
 
 ## Active Priorities
 
-1. AWS AI Developer Professional cert
-2. Azure AI Architect cert
-3. Tourno — football tournament web app
-4. Cloud advisory expansion to Azure
+### Cloud Architect (Day Job)
+- See `state/cloud-architect.md`
+- Confluence: `CDS` (CGI Documentation)
+
+### Professional Development
+- AWS AI Developer Professional cert — in progress
+- Azure AI Architect cert — in progress
+- See `state/professional-dev.md`
+- Confluence: `CLOUD` (Cr3Data)
+
+### Tourno
+- Q1 2026 sprint active — 5 tickets To Do
+- Jira project: `TF` | Confluence: `tourno`
+- See `memory/project_tourno_jira.md`
 
 ## Open Threads
 
