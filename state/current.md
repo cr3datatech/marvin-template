@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-17 (session 4)
+Last updated: 2026-03-17 (session 6)
 
 ## Active Priorities
 
@@ -25,6 +25,8 @@ Last updated: 2026-03-17 (session 4)
 - Morning briefing via Telegram/Slack not yet set up
 - claude-mem parked for future consideration — full stack (worker, Chroma, hooks) deemed too heavy for now
 - Google Workspace fully connected — Gmail, Calendar, Drive, Photos available in both bots
+- Atlassian MCP confirmed working in Groot — can use instead of REST API calls from here
+- Bots could use Atlassian MCP via Claude API (not yet implemented)
 
 ## Recent Context
 
