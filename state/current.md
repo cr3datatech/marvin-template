@@ -11,11 +11,13 @@ Last updated: 2026-03-16
 
 ## Open Threads
 
-- None yet
+- Atlassian MCP OAuth not yet completed — needs SSH port-forward trick to auth
 
 ## Recent Context
 
-- Just set up Groot
+- Groot set up and running
+- Slack MCP working
+- Atlassian MCP configured but OAuth blocked by SSH/localhost issue — fix documented in session log 2026-03-16
 
 ---
 
