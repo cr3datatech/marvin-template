@@ -217,6 +217,25 @@ TOOLS = [
             },
             "required": []
         }
+    },
+    {
+        "name": "move_jira_ticket_to_sprint",
+        "description": "Move a Jira ticket to a sprint. If sprint_name is not provided or is empty, list available sprints so the user can choose.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "ticket_key": {
+                    "type": "string",
+                    "description": "The Jira ticket key, e.g. TF-429"
+                },
+                "sprint_name": {
+                    "type": "string",
+                    "description": "Name of the sprint to move the ticket to. Leave empty to list available sprints.",
+                    "default": ""
+                }
+            },
+            "required": ["ticket_key"]
+        }
     }
 ]
 
@@ -440,6 +459,11 @@ Key locations in the MARVIN workspace:
                 )
             elif tool_name == "list_jira_tickets":
                 return self._tool_list_jira_tickets(tool_input.get("status", ""))
+            elif tool_name == "move_jira_ticket_to_sprint":
+                return self._tool_move_jira_ticket_to_sprint(
+                    tool_input["ticket_key"],
+                    tool_input["sprint_name"]
+                )
             else:
                 return f"Unknown tool: {tool_name}"
         except ValueError as e:
@@ -589,11 +613,11 @@ Key locations in the MARVIN workspace:
         jql = 'project=TF AND sprint="tourno Q1 2026"'
         if status:
             jql += f' AND status="{status}"'
-        resp = requests.get(
-            f"{base_url}/rest/api/3/search",
-            params={"jql": jql, "fields": "summary,status,priority,issuetype", "maxResults": 50},
+        resp = requests.post(
+            f"{base_url}/rest/api/3/search/jql",
+            json={"jql": jql, "fields": ["summary", "status", "priority", "issuetype"], "maxResults": 50},
             auth=self._jira_auth(),
-            headers={"Accept": "application/json"}
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
         )
         if resp.status_code != 200:
             return f"Error fetching tickets: {resp.status_code}"
@@ -606,6 +630,43 @@ Key locations in the MARVIN workspace:
             p = i["fields"]["priority"]["name"]
             lines.append(f"[{i['key']}] {i['fields']['summary']} | {s} | {p}")
         return f"{len(issues)} ticket(s):\n" + "\n".join(lines)
+
+    def _tool_move_jira_ticket_to_sprint(self, ticket_key: str, sprint_name: str = "") -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        resp = requests.get(
+            f"{base_url}/rest/agile/1.0/board/6/sprint",
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json"}
+        )
+        if resp.status_code != 200:
+            return f"Error fetching sprints: {resp.status_code}"
+        sprints = resp.json().get("values", [])
+        # If no sprint name given, list available sprints for the user to choose
+        if not sprint_name:
+            active = [s for s in sprints if s["state"] == "active"]
+            future = [s for s in sprints if s["state"] == "future"]
+            lines = []
+            if active:
+                lines.append("Active sprints:")
+                lines += [f"  • {s['name']}" for s in active]
+            if future:
+                lines.append("Future sprints:")
+                lines += [f"  • {s['name']}" for s in future]
+            return "Which sprint? Please specify the sprint name:\n" + "\n".join(lines)
+        sprint = next((s for s in sprints if s["name"].lower() == sprint_name.lower()), None)
+        if not sprint:
+            active = [s["name"] for s in sprints if s["state"] in ("active", "future")]
+            return f"Sprint '{sprint_name}' not found. Available: {', '.join(active)}"
+        sprint_id = sprint["id"]
+        resp = requests.post(
+            f"{base_url}/rest/agile/1.0/sprint/{sprint_id}/issue",
+            json={"issues": [ticket_key]},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp.status_code == 204:
+            return f"Moved {ticket_key} to sprint '{sprint['name']}'"
+        return f"Error moving ticket: {resp.status_code} {resp.text}"
 
     def _tool_fetch_url(self, url: str) -> str:
         """Fetch content from a URL."""
