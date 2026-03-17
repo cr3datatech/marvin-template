@@ -189,6 +189,29 @@ TOOLS = [
         }
     },
     {
+        "name": "delete_jira_ticket",
+        "description": "Permanently delete a Jira ticket. This cannot be undone.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "ticket_key": {"type": "string", "description": "Ticket to delete, e.g. TF-436"}
+            },
+            "required": ["ticket_key"]
+        }
+    },
+    {
+        "name": "transition_jira_ticket",
+        "description": "Move a Jira ticket through the workflow. Valid statuses: 'To Do', 'Implementation', 'Ready For Prod', 'Closed'.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "ticket_key": {"type": "string", "description": "Ticket to transition, e.g. TF-429"},
+                "status": {"type": "string", "description": "Target status: 'To Do', 'Implementation', 'Ready For Prod', or 'Closed'"}
+            },
+            "required": ["ticket_key", "status"]
+        }
+    },
+    {
         "name": "set_jira_epic",
         "description": "Add a Jira ticket to an epic. Provide the ticket key and epic key.",
         "input_schema": {
@@ -390,6 +413,10 @@ You have tools to:
                 return self._tool_list_jira_tickets(tool_input.get("status", ""))
             elif tool_name == "list_jira_epics":
                 return self._tool_list_jira_epics()
+            elif tool_name == "delete_jira_ticket":
+                return self._tool_delete_jira_ticket(tool_input["ticket_key"])
+            elif tool_name == "transition_jira_ticket":
+                return self._tool_transition_jira_ticket(tool_input["ticket_key"], tool_input["status"])
             elif tool_name == "set_jira_epic":
                 return self._tool_set_jira_epic(tool_input["ticket_key"], tool_input["epic_key"])
             elif tool_name == "remove_jira_from_epic":
@@ -528,6 +555,41 @@ You have tools to:
             p = i["fields"]["priority"]["name"]
             lines.append(f"[{i['key']}] {i['fields']['summary']} | {s} | {p}")
         return f"{len(issues)} ticket(s):\n" + "\n".join(lines)
+
+    def _tool_delete_jira_ticket(self, ticket_key: str) -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        resp = requests.delete(
+            f"{base_url}/rest/api/3/issue/{ticket_key}",
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json"}
+        )
+        if resp.status_code == 204:
+            return f"Deleted {ticket_key}"
+        return f"Error deleting {ticket_key}: {resp.status_code} {resp.text}"
+
+    def _tool_transition_jira_ticket(self, ticket_key: str, status: str) -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        resp = requests.get(
+            f"{base_url}/rest/api/3/issue/{ticket_key}/transitions",
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json"}
+        )
+        if resp.status_code != 200:
+            return f"Error fetching transitions: {resp.status_code}"
+        transitions = resp.json().get("transitions", [])
+        transition = next((t for t in transitions if t["name"].lower() == status.lower()), None)
+        if not transition:
+            available = [t["name"] for t in transitions]
+            return f"Status '{status}' not available. Available transitions: {', '.join(available)}"
+        resp = requests.post(
+            f"{base_url}/rest/api/3/issue/{ticket_key}/transitions",
+            json={"transition": {"id": transition["id"]}},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp.status_code == 204:
+            return f"Moved {ticket_key} to '{transition['name']}'"
+        return f"Error transitioning {ticket_key}: {resp.status_code} {resp.text}"
 
     def _tool_set_jira_epic(self, ticket_key: str, epic_key: str) -> str:
         base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
