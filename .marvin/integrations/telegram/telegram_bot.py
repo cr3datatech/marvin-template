@@ -219,6 +219,15 @@ TOOLS = [
         }
     },
     {
+        "name": "list_jira_epics",
+        "description": "List available epics in the Tourno Jira project.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
         "name": "move_jira_ticket_to_sprint",
         "description": "Move a Jira ticket to a sprint. If sprint_name is not provided or is empty, list available sprints so the user can choose.",
         "input_schema": {
@@ -459,10 +468,12 @@ Key locations in the MARVIN workspace:
                 )
             elif tool_name == "list_jira_tickets":
                 return self._tool_list_jira_tickets(tool_input.get("status", ""))
+            elif tool_name == "list_jira_epics":
+                return self._tool_list_jira_epics()
             elif tool_name == "move_jira_ticket_to_sprint":
                 return self._tool_move_jira_ticket_to_sprint(
                     tool_input["ticket_key"],
-                    tool_input["sprint_name"]
+                    tool_input.get("sprint_name", "")
                 )
             else:
                 return f"Unknown tool: {tool_name}"
@@ -630,6 +641,22 @@ Key locations in the MARVIN workspace:
             p = i["fields"]["priority"]["name"]
             lines.append(f"[{i['key']}] {i['fields']['summary']} | {s} | {p}")
         return f"{len(issues)} ticket(s):\n" + "\n".join(lines)
+
+    def _tool_list_jira_epics(self) -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        resp = requests.post(
+            f"{base_url}/rest/api/3/search/jql",
+            json={"jql": "project=TF AND issuetype=Epic ORDER BY created DESC", "fields": ["summary", "status"], "maxResults": 50},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp.status_code != 200:
+            return f"Error fetching epics: {resp.status_code}"
+        issues = resp.json().get("issues", [])
+        if not issues:
+            return "No epics found in the Tourno project."
+        lines = [f"[{i['key']}] {i['fields']['summary']} | {i['fields']['status']['name']}" for i in issues]
+        return f"{len(issues)} epic(s):\n" + "\n".join(lines)
 
     def _tool_move_jira_ticket_to_sprint(self, ticket_key: str, sprint_name: str = "") -> str:
         base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
