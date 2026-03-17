@@ -1,24 +1,24 @@
-# MARVIN - Your AI Chief of Staff
+# Groot - Your AI Chief of Staff
 
-**MARVIN** = Manages Appointments, Reads Various Important Notifications
+**Groot** (formerly MARVIN) = Your personal AI assistant
 
 An AI assistant that remembers your conversations, tracks your goals, and helps you stay organized. Like having a personal chief of staff who never forgets anything.
 
-## Why MARVIN?
+## Why Groot?
 
-MARVIN extends Claude Code with capabilities designed for getting things done:
+Groot extends Claude Code with capabilities designed for getting things done:
 
 - **Session continuity** - Pick up where you left off, even days later. Every conversation builds on the last.
-- **Goal tracking** - Set work and personal goals, MARVIN monitors progress and nudges you forward.
+- **Goal tracking** - Set work and personal goals, Groot monitors progress and nudges you forward.
 - **Tool integrations** - Connect to Google Workspace, Microsoft 365, Atlassian, Slack, Linear, Notion, Telegram, and more.
 - **Extensibility** - Add commands, agents, and skills tailored to your workflow. Create new capabilities with simple markdown files.
-- **Thought partner** - MARVIN pushes back on weak ideas, asks probing questions, and helps you think through decisions. Not just a yes-man.
+- **Thought partner** - Groot pushes back on weak ideas, asks probing questions, and helps you think through decisions. Not just a yes-man.
 
 ## Quick Start with Claude Code
 
-1. Clone this repository:
+1. Clone this repository (or your fork):
    ```bash
-   git clone https://github.com/SterlingChin/marvin-template.git
+   git clone https://github.com/cr3datatech/marvin-template.git
    cd marvin-template
    ```
 
@@ -27,14 +27,14 @@ MARVIN extends Claude Code with capabilities designed for getting things done:
    claude
    ```
 
-3. Ask MARVIN to help you set up:
-   > "Help me set up MARVIN"
+3. Ask Groot to help you set up:
+   > "Help me set up Groot"
 
-That's it. MARVIN walks you through the rest: your profile, goals, workspace location, and optional integrations.
+That's it. Groot walks you through the rest: your profile, goals, workspace location, and optional integrations (including Atlassian for Jira/Confluence).
 
 ## Getting Started with GitHub Copilot CLI
 
-Want to use Copilot CLI to set up MARVIN quickly? Here's how:
+Want to use Copilot CLI to set up Groot quickly? Here's how:
 
 ### Prerequisites
 
@@ -49,15 +49,15 @@ Use these Copilot commands to get started:
 gh copilot suggest "clone marvin template repository"
 
 # Run the setup script
-gh copilot suggest "run setup script for marvin"
+gh copilot suggest "run setup script for groot"
 
-# Start MARVIN
-gh copilot suggest "start marvin AI assistant"
+# Start Groot
+gh copilot suggest "start groot AI assistant"
 ```
 
 The `.marvin/setup.sh` script handles the complete installation: prerequisites, workspace creation, profile setup, and shell aliases. Just follow the prompts to configure your AI Chief of Staff.
 
-For additional integrations (Google Workspace, Slack, etc.), use:
+For additional integrations (Google Workspace, Atlassian, Slack, etc.), use:
 
 ```bash
 gh copilot suggest "configure marvin integrations"
@@ -67,7 +67,7 @@ gh copilot suggest "configure marvin integrations"
 
 ### Daily Workflow
 
-Start your day with `/start` for a briefing: priorities, deadlines, progress toward goals. Work naturally throughout the day, MARVIN remembers everything. End with `/end` to save context for next time.
+Start your day with `/start` for a briefing: priorities, deadlines, progress toward goals. Work naturally throughout the day, Groot remembers everything. End with `/end` to save context for next time.
 
 Between sessions, `/update` saves progress without ending. `/sync` pulls new features from this template into your workspace.
 
@@ -86,7 +86,7 @@ Between sessions, `/update` saves progress without ending. `/sync` pulls new fea
 
 ### Integrations
 
-MARVIN connects to tools you already use:
+Groot connects to tools you already use:
 
 | Integration | What It Provides |
 |-------------|------------------|
@@ -96,24 +96,24 @@ MARVIN connects to tools you already use:
 | [Slack](.marvin/integrations/slack/) | Channel monitoring, posting |
 | [Linear](.marvin/integrations/linear/) | Issue tracking |
 | [Notion](.marvin/integrations/notion/) | Page reading, database queries |
-| [Telegram](.marvin/integrations/telegram/) | Chat with MARVIN from your phone |
+| [Telegram](.marvin/integrations/telegram/) | Chat with Groot from your phone |
 | [Parallel Search](.marvin/integrations/parallel-search/) | Web search capabilities |
 
 Each integration includes setup instructions in its directory.
 
 ### Skills and Agents
 
-MARVIN uses a `.claude/` directory structure for extensibility:
+Groot uses a `.claude/` directory structure for extensibility:
 
 - **Commands** (`.claude/commands/`) - User-triggered workflows you invoke with slash commands
-- **Agents** (`.claude/agents/`) - Specialized subagents MARVIN spawns for delegated work
+- **Agents** (`.claude/agents/`) - Specialized subagents Groot spawns for delegated work
 - **Skills** (`.claude/skills/`) - Reusable capabilities Claude Code invokes contextually
 
 Templates are included for each type. Just say "create a skill for X" and MARVIN generates the file.
 
 ## How It Works
 
-MARVIN separates your workspace from the template:
+Groot separates your workspace from the template:
 
 ```
 ~/marvin/                    Your workspace (your data lives here)
@@ -143,16 +143,15 @@ The script copies your profile, goals, sessions, reports, and custom skills to a
 
 ## Contributing
 
-MARVIN welcomes contributions in three areas:
+This template welcomes contributions in three areas:
 
 1. **Integrations** - Add support for new tools. See [.marvin/integrations/CLAUDE.md](.marvin/integrations/CLAUDE.md) for patterns and security requirements.
-2. **Commands, agents, skills** - Extend MARVIN's capabilities. Templates are in `.claude/commands/`, `.claude/agents/`, and `.claude/skills/`.
+2. **Commands, agents, skills** - Extend Groot's capabilities. Templates are in `.claude/commands/`, `.claude/agents/`, and `.claude/skills/`.
 3. **Bug fixes** - Found an issue? Submit a PR with the fix and a test case.
 
 Fork the repo, create a branch, and submit a PR. All contributions are reviewed.
 
 ## About
 
-MARVIN is named after the Paranoid Android from The Hitchhiker's Guide to the Galaxy.
+This project is based on the original MARVIN template by [Sterling Chin](https://sterlingchin.com), adapted into Groot as a personalized AI chief of staff workspace.
 
-Created by [Sterling Chin](https://sterlingchin.com).
