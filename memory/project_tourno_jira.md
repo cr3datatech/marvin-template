@@ -34,5 +34,5 @@ _(none currently)_
 | TF-434 | ai failed email check | Medium |
 | TF-435 | failed email check | Medium |
 
-**Why:** Jira is a work intake source for Tourno. Groot queries it via REST API (basic auth with bot account cr3data.bot@gmail.com).
+**Why:** Jira is a work intake source for Tourno. Groot queries it via REST API (basic auth with craig@rothwell.fi).
 **How to apply:** Use this as context when discussing Tourno work, priorities, and sprint progress.

@@ -15,6 +15,6 @@ Instance: https://cr3data.atlassian.net/wiki
 | Tourno | `tourno` | tourno | memory/project_tourno_jira.md |
 
 ## API Access
-- Auth: Basic auth with cr3data.bot@gmail.com + JIRA_API_TOKEN from .env
+- Auth: Basic auth with craig@rothwell.fi + JIRA_API_TOKEN from .env
 - Confluence API base: https://cr3data.atlassian.net/wiki/rest/api
 - Jira API base: https://cr3data.atlassian.net/rest/api/3
