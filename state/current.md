@@ -24,7 +24,7 @@ Last updated: 2026-03-17 (session 4)
 - Delete ticket/page confirmation step not yet added to bots (executes immediately)
 - Morning briefing via Telegram/Slack not yet set up
 - claude-mem parked for future consideration — full stack (worker, Chroma, hooks) deemed too heavy for now
-- Google bot auth pending — run `.marvin/integrations/google-workspace/bot_auth.sh` then restart both bots
+- Google Workspace fully connected — Gmail, Calendar, Drive, Photos available in both bots
 
 ## Recent Context
 
