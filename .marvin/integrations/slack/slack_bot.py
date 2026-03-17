@@ -14,6 +14,7 @@ import re
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+import requests
 
 from dotenv import load_dotenv
 
@@ -139,6 +140,52 @@ TOOLS = [
                 }
             },
             "required": ["url"]
+        }
+    },
+    {
+        "name": "create_jira_ticket",
+        "description": "Create a new Jira ticket in the Tourno project (TF). Use this when the user wants to log a bug, story, or task.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "summary": {
+                    "type": "string",
+                    "description": "Short title of the ticket"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Detailed description of the ticket",
+                    "default": ""
+                },
+                "issue_type": {
+                    "type": "string",
+                    "description": "Type of issue: Story, Bug, or Task",
+                    "enum": ["Story", "Bug", "Task"],
+                    "default": "Story"
+                },
+                "priority": {
+                    "type": "string",
+                    "description": "Priority: Highest, High, Medium, Low, Lowest",
+                    "enum": ["Highest", "High", "Medium", "Low", "Lowest"],
+                    "default": "Medium"
+                }
+            },
+            "required": ["summary"]
+        }
+    },
+    {
+        "name": "list_jira_tickets",
+        "description": "List tickets in the current Tourno sprint, optionally filtered by status.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "description": "Optional status filter: 'To Do', 'In Progress', 'Closed'",
+                    "default": ""
+                }
+            },
+            "required": []
         }
     }
 ]
@@ -281,6 +328,15 @@ You have tools to:
                 return self._tool_append_to_file(tool_input["path"], tool_input["content"])
             elif tool_name == "fetch_url":
                 return self._tool_fetch_url(tool_input["url"])
+            elif tool_name == "create_jira_ticket":
+                return self._tool_create_jira_ticket(
+                    tool_input["summary"],
+                    tool_input.get("description", ""),
+                    tool_input.get("issue_type", "Story"),
+                    tool_input.get("priority", "Medium")
+                )
+            elif tool_name == "list_jira_tickets":
+                return self._tool_list_jira_tickets(tool_input.get("status", ""))
             else:
                 return f"Unknown tool: {tool_name}"
         except ValueError as e:
@@ -357,6 +413,59 @@ You have tools to:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             file_path.write_text(content)
         return f"Appended {len(content)} chars to {path}"
+
+    def _jira_auth(self):
+        return (os.environ.get("JIRA_EMAIL", ""), os.environ.get("JIRA_API_TOKEN", ""))
+
+    def _tool_create_jira_ticket(self, summary: str, description: str = "", issue_type: str = "Story", priority: str = "Medium") -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        payload = {
+            "fields": {
+                "project": {"key": "TF"},
+                "summary": summary,
+                "issuetype": {"name": issue_type},
+                "priority": {"name": priority}
+            }
+        }
+        if description:
+            payload["fields"]["description"] = {
+                "type": "doc",
+                "version": 1,
+                "content": [{"type": "paragraph", "content": [{"type": "text", "text": description}]}]
+            }
+        resp = requests.post(
+            f"{base_url}/rest/api/3/issue",
+            json=payload,
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp.status_code == 201:
+            data = resp.json()
+            return f"Created {data['key']}: {summary}\n{base_url}/browse/{data['key']}"
+        return f"Error creating ticket: {resp.status_code} {resp.text}"
+
+    def _tool_list_jira_tickets(self, status: str = "") -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        jql = 'project=TF AND sprint="tourno Q1 2026"'
+        if status:
+            jql += f' AND status="{status}"'
+        resp = requests.get(
+            f"{base_url}/rest/api/3/search",
+            params={"jql": jql, "fields": "summary,status,priority,issuetype", "maxResults": 50},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json"}
+        )
+        if resp.status_code != 200:
+            return f"Error fetching tickets: {resp.status_code}"
+        issues = resp.json().get("issues", [])
+        if not issues:
+            return "No tickets found."
+        lines = []
+        for i in issues:
+            s = i["fields"]["status"]["name"]
+            p = i["fields"]["priority"]["name"]
+            lines.append(f"[{i['key']}] {i['fields']['summary']} | {s} | {p}")
+        return f"{len(issues)} ticket(s):\n" + "\n".join(lines)
 
     def _tool_fetch_url(self, url: str) -> str:
         try:
