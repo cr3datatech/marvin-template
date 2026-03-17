@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-17
+Last updated: 2026-03-17 (session 3)
 
 ## Active Priorities
 
@@ -23,6 +23,7 @@ Last updated: 2026-03-17
 
 - Delete ticket/page confirmation step not yet added to bots (executes immediately)
 - Morning briefing via Telegram/Slack not yet set up
+- claude-mem implementation pending — full stack install on VPS (plugin vs manual TBD)
 
 ## Recent Context
 
