@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-17 (session 3)
+Last updated: 2026-03-17 (session 4)
 
 ## Active Priorities
 
@@ -24,6 +24,7 @@ Last updated: 2026-03-17 (session 3)
 - Delete ticket/page confirmation step not yet added to bots (executes immediately)
 - Morning briefing via Telegram/Slack not yet set up
 - claude-mem parked for future consideration — full stack (worker, Chroma, hooks) deemed too heavy for now
+- Google bot auth pending — run `.marvin/integrations/google-workspace/bot_auth.sh` then restart both bots
 
 ## Recent Context
 
@@ -34,6 +35,8 @@ Last updated: 2026-03-17 (session 3)
 - Telegram bot running as systemd service (groot-telegram)
 - Slack bot running as systemd service (groot-slack)
 - Memory backed up in git repo
+- Google Workspace MCP added to Groot (Gmail, Drive, Calendar, Docs, Sheets, Slides)
+- Google Workspace plugin built for both bots — pending one-time OAuth auth
 
 ---
 

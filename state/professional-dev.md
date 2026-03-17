@@ -8,10 +8,10 @@ Confluence space: `CLOUD` (Cr3Data) — https://cr3data.atlassian.net/wiki/space
 
 ## Certifications
 
-| Cert | Status | Target Date | Notes |
-|------|--------|-------------|-------|
-| AWS AI Developer Professional | In progress | | |
-| Azure AI Architect | In progress | | |
+| Cert | Status | Target Date | Confluence Page ID | Notes |
+|------|--------|-------------|-------------------|-------|
+| AWS AI Developer Professional | In progress | TBD | 1244037122 | https://cr3data.atlassian.net/wiki/spaces/CLOUD/pages/1244037122 |
+| Azure AI Architect | In progress | | | |
 
 ---
 
