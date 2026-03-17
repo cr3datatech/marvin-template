@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groot Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 50px;
+  }
+
+  /* ── Layout ── */
+  .arch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── Connector lines ── */
+  .connector {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, #444, #333);
+    position: relative;
+  }
+
+  .connector::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid #444;
+  }
+
+  .connector-wide {
+    width: 100%;
+    height: 40px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* ── User layer ── */
+  .user-layer {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .user-card {
+    background: #1a1d2e;
+    border: 1px solid #2a2d4a;
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 130px;
+  }
+
+  .user-card .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .user-card .label { font-size: 0.8rem; color: #888; }
+  .user-card .name { font-size: 0.95rem; font-weight: 600; color: #ddd; }
+
+  /* ── Brain / Core ── */
+  .core {
+    background: linear-gradient(135deg, #1e1b4b, #2d1f63);
+    border: 2px solid #6d28d9;
+    border-radius: 16px;
+    padding: 24px 40px;
+    text-align: center;
+    width: 340px;
+    box-shadow: 0 0 40px rgba(109, 40, 217, 0.3);
+    position: relative;
+  }
+
+  .core .badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #6d28d9;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .core .icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+  .core .name { font-size: 1.4rem; font-weight: 700; color: #fff; }
+  .core .desc { font-size: 0.8rem; color: #a78bfa; margin-top: 4px; }
+
+  /* ── Row layout ── */
+  .row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  /* ── Sections / Cards ── */
+  .section {
+    border-radius: 14px;
+    padding: 18px;
+    flex: 1;
+    min-width: 220px;
+    max-width: 340px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .section-icon { font-size: 1.4rem; }
+
+  .section-title { font-size: 0.95rem; font-weight: 700; }
+  .section-subtitle { font-size: 0.72rem; opacity: 0.6; margin-top: 1px; }
+
+  /* ── Tool pills ── */
+  .tools { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tool {
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+  }
+
+  /* ── Colour themes ── */
+  .theme-purple {
+    background: #1e1b2e;
+    border: 1px solid #4c1d95;
+  }
+  .theme-purple .section-title { color: #c4b5fd; }
+  .theme-purple .tool { background: #2d1f5e; color: #c4b5fd; border: 1px solid #4c1d95; }
+
+  .theme-green {
+    background: #0f2318;
+    border: 1px solid #065f46;
+  }
+  .theme-green .section-title { color: #6ee7b7; }
+  .theme-green .tool { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
+
+  .theme-blue {
+    background: #0f1e35;
+    border: 1px solid #1e40af;
+  }
+  .theme-blue .section-title { color: #93c5fd; }
+  .theme-blue .tool { background: #1e3a5f; color: #93c5fd; border: 1px solid #1e40af; }
+
+  .theme-orange {
+    background: #1f1208;
+    border: 1px solid #92400e;
+  }
+  .theme-orange .section-title { color: #fbbf24; }
+  .theme-orange .tool { background: #3b1f04; color: #fbbf24; border: 1px solid #92400e; }
+
+  .theme-red {
+    background: #1f0a0a;
+    border: 1px solid #991b1b;
+  }
+  .theme-red .section-title { color: #fca5a5; }
+  .theme-red .tool { background: #3b0a0a; color: #fca5a5; border: 1px solid #991b1b; }
+
+  .theme-teal {
+    background: #061b1b;
+    border: 1px solid #0f766e;
+  }
+  .theme-teal .section-title { color: #5eead4; }
+  .theme-teal .tool { background: #0a2e2e; color: #5eead4; border: 1px solid #0f766e; }
+
+  .theme-pink {
+    background: #1f0a18;
+    border: 1px solid #9d174d;
+  }
+  .theme-pink .section-title { color: #f9a8d4; }
+  .theme-pink .tool { background: #3b0a20; color: #f9a8d4; border: 1px solid #9d174d; }
+
+  /* ── Bot layer ── */
+  .bot-layer {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .bot-card {
+    border-radius: 14px;
+    padding: 18px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 520px;
+  }
+
+  /* ── MCP layer ── */
+  .mcp-layer {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  /* ── External services ── */
+  .external-layer {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .ext-card {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 12px 18px;
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .ext-card .icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+  .ext-card .name { font-size: 0.75rem; color: #777; font-weight: 600; }
+
+  /* ── Section label ── */
+  .layer-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #444;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  /* ── Dividers with label ── */
+  .divider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 8px 0;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: #222;
+  }
+
+  .divider-text {
+    font-size: 0.65rem;
+    color: #444;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── Arrows between layers ── */
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    width: 100%;
+    padding: 6px 0;
+  }
+
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .arrow-line {
+    width: 2px;
+    height: 30px;
+    background: #333;
+  }
+
+  .arrow-head {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid #333;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #1e1e1e;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #666;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── Token note ── */
+  .token-note {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    color: #555;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .token-note span { color: #888; }
+</style>
+</head>
+<body>
+
+<h1>🌲 Groot Architecture</h1>
+<p class="subtitle">AI Chief of Staff — integrations, tools, and data flows</p>
+
+<div class="arch">
+
+  <!-- ── USER LAYER ── -->
+  <div class="layer-label">Access Points</div>
+  <div class="user-layer">
+    <div class="user-card">
+      <span class="icon">💻</span>
+      <div class="name">Terminal</div>
+      <div class="label">Claude Code CLI</div>
+    </div>
+    <div class="user-card">
+      <span class="icon">✈️</span>
+      <div class="name">Telegram</div>
+      <div class="label">Mobile / Chat</div>
+    </div>
+    <div class="user-card">
+      <span class="icon">💬</span>
+      <div class="name">Slack</div>
+      <div class="label">Team / Desktop</div>
+    </div>
+  </div>
+
+  <div style="height:30px; display:flex; justify-content:center;">
+    <div class="connector"></div>
+  </div>
+
+  <!-- ── CORE ── -->
+  <div class="core">
+    <div class="badge">Core AI</div>
+    <span class="icon">🌲</span>
+    <div class="name">Groot</div>
+    <div class="desc">Claude Sonnet 4.6 · 200K context</div>
+  </div>
+
+  <div style="height:30px; display:flex; justify-content:center;">
+    <div class="connector"></div>
+  </div>
+
+  <!-- ── CLAUDE CODE MCP LAYER ── -->
+  <div class="layer-label">Groot (Claude Code) — MCP Servers</div>
+  <div class="mcp-layer">
+
+    <div class="section theme-teal">
+      <div class="section-header">
+        <span class="section-icon">🔷</span>
+        <div>
+          <div class="section-title">Atlassian MCP</div>
+          <div class="section-subtitle">Remote · mcp.atlassian.com</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">Jira Issues</span>
+        <span class="tool">Jira Projects</span>
+        <span class="tool">Jira Sprints</span>
+        <span class="tool">Confluence Pages</span>
+        <span class="tool">Confluence Spaces</span>
+        <span class="tool">Confluence Search</span>
+      </div>
+    </div>
+
+    <div class="section theme-blue">
+      <div class="section-header">
+        <span class="section-icon">🔑</span>
+        <div>
+          <div class="section-title">Google Workspace MCP</div>
+          <div class="section-subtitle">OAuth · uvx workspace-mcp</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">Gmail</span>
+        <span class="tool">Calendar</span>
+        <span class="tool">Drive</span>
+        <span class="tool">Docs</span>
+        <span class="tool">Sheets</span>
+        <span class="tool">Slides</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="height:14px"></div>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-text">Bot Processes (systemd)</div>
+    <div class="divider-line"></div>
+  </div>
+  <div style="height:14px"></div>
+
+  <!-- ── BOT LAYER ── -->
+  <div class="bot-layer">
+
+    <!-- Telegram Bot -->
+    <div class="bot-card theme-blue">
+      <div class="section-header">
+        <span class="section-icon">✈️</span>
+        <div>
+          <div class="section-title">Telegram Bot</div>
+          <div class="section-subtitle">Python · groot-telegram.service · SQLite history</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:8px; font-size:0.7rem; color:#555; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Tool Plugins</div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">workspace.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">read_file</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">write_file</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">search_files</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">list_directory</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">append_to_file</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">jira.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">create_jira_ticket</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">list_jira_tickets</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">delete_jira_ticket</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">transition_jira_ticket</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">set_jira_epic</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">move_jira_ticket_to_sprint</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">list_jira_epics</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">remove_jira_from_epic</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">confluence.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">list_confluence_spaces</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">list_confluence_pages</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">read_confluence_page</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">create_confluence_page</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">update_confluence_page</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">delete_confluence_page</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">google_workspace.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">gmail_list_emails</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">gmail_read_email</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">gmail_send_email</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">calendar_list_events</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">calendar_create_event</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">drive_search_files</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">drive_read_file</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">photos_list_albums</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">photos_search</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">fetch_url.py · send_file.py · meta.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">fetch_url</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">send_file</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">create_tool</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">list_tools</span>
+            <span class="tool" style="background:#1e3a5f;color:#93c5fd;border-color:#1e40af">delete_tool</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Slack Bot -->
+    <div class="bot-card theme-green">
+      <div class="section-header">
+        <span class="section-icon">💬</span>
+        <div>
+          <div class="section-title">Slack Bot</div>
+          <div class="section-subtitle">Python · groot-slack.service · SQLite history</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:8px; font-size:0.7rem; color:#555; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Tool Plugins</div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">workspace.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">read_file</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">write_file</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">search_files</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">list_directory</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">append_to_file</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">jira.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">create_jira_ticket</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">list_jira_tickets</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">delete_jira_ticket</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">transition_jira_ticket</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">set_jira_epic</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">move_jira_ticket_to_sprint</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">list_jira_epics</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">remove_jira_from_epic</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">confluence.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">list_confluence_spaces</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">list_confluence_pages</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">read_confluence_page</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">create_confluence_page</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">update_confluence_page</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">delete_confluence_page</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">google_workspace.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">gmail_list_emails</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">gmail_read_email</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">gmail_send_email</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">calendar_list_events</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">calendar_create_event</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">drive_search_files</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">drive_read_file</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">photos_list_albums</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">photos_search</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.7rem; color:#6b7280; margin-bottom:5px;">fetch_url.py · meta.py</div>
+          <div class="tools">
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">fetch_url</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">create_tool</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">list_tools</span>
+            <span class="tool" style="background:#064e3b;color:#6ee7b7;border-color:#065f46">delete_tool</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div style="height:14px"></div>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-text">External Services</div>
+    <div class="divider-line"></div>
+  </div>
+  <div style="height:14px"></div>
+
+  <!-- ── EXTERNAL SERVICES ── -->
+  <div class="external-layer">
+    <div class="ext-card">
+      <span class="icon">🔷</span>
+      <div class="name">Jira</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">📄</span>
+      <div class="name">Confluence</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">📧</span>
+      <div class="name">Gmail</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">📅</span>
+      <div class="name">Calendar</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">📁</span>
+      <div class="name">Drive</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">🖼️</span>
+      <div class="name">Photos</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">🌐</span>
+      <div class="name">Web / URLs</div>
+    </div>
+    <div class="ext-card">
+      <span class="icon">🗂️</span>
+      <div class="name">Groot Workspace</div>
+    </div>
+  </div>
+
+  <!-- ── AUTH NOTE ── -->
+  <div class="token-note" style="max-width:700px; margin-top:16px;">
+    <span>Auth:</span> Atlassian → OAuth (MCP) · Google Workspace → OAuth token at <code>~/.config/groot/google_token.json</code> · Jira/Confluence (bots) → API Token · Slack → xoxp user token · Telegram → Bot token
+  </div>
+
+  <!-- ── WORKSPACE NOTE ── -->
+  <div style="max-width:900px; margin-top:30px; width:100%;">
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">Workspace &amp; Memory</div>
+      <div class="divider-line"></div>
+    </div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:14px;">
+      <div class="section theme-purple" style="max-width:240px;">
+        <div class="section-header">
+          <span class="section-icon">🧠</span>
+          <div>
+            <div class="section-title">Auto Memory</div>
+            <div class="section-subtitle">~/.claude/projects/.../memory/</div>
+          </div>
+        </div>
+        <div class="tools">
+          <span class="tool">user_profile</span>
+          <span class="tool">feedback</span>
+          <span class="tool">project context</span>
+          <span class="tool">references</span>
+        </div>
+      </div>
+      <div class="section theme-orange" style="max-width:240px;">
+        <div class="section-header">
+          <span class="section-icon">📋</span>
+          <div>
+            <div class="section-title">State Files</div>
+            <div class="section-subtitle">state/ · sessions/</div>
+          </div>
+        </div>
+        <div class="tools">
+          <span class="tool">current.md</span>
+          <span class="tool">goals.md</span>
+          <span class="tool">session logs</span>
+          <span class="tool">CLAUDE.md</span>
+        </div>
+      </div>
+      <div class="section theme-pink" style="max-width:240px;">
+        <div class="section-header">
+          <span class="section-icon">⚡</span>
+          <div>
+            <div class="section-title">Commands &amp; Skills</div>
+            <div class="section-subtitle">.claude/commands · .claude/skills</div>
+          </div>
+        </div>
+        <div class="tools">
+          <span class="tool">/start</span>
+          <span class="tool">/end</span>
+          <span class="tool">/commit</span>
+          <span class="tool">/report</span>
+          <span class="tool">/status</span>
+          <span class="tool">/sync</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEGEND ── -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#6d28d9"></div>
+      Core AI (Claude Code)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#0f766e"></div>
+      MCP Servers (Claude Code only)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#1e40af"></div>
+      Telegram Bot tools
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#065f46"></div>
+      Slack Bot tools
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#2a2a2a"></div>
+      External services
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
