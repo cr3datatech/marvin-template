@@ -189,6 +189,29 @@ TOOLS = [
         }
     },
     {
+        "name": "set_jira_epic",
+        "description": "Add a Jira ticket to an epic. Provide the ticket key and epic key.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "ticket_key": {"type": "string", "description": "Ticket to update, e.g. TF-436"},
+                "epic_key": {"type": "string", "description": "Epic to assign it to, e.g. TF-351"}
+            },
+            "required": ["ticket_key", "epic_key"]
+        }
+    },
+    {
+        "name": "remove_jira_from_epic",
+        "description": "Remove a Jira ticket from its epic.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "ticket_key": {"type": "string", "description": "Ticket to remove from its epic, e.g. TF-436"}
+            },
+            "required": ["ticket_key"]
+        }
+    },
+    {
         "name": "list_jira_epics",
         "description": "List available epics in the Tourno Jira project.",
         "input_schema": {
@@ -367,6 +390,10 @@ You have tools to:
                 return self._tool_list_jira_tickets(tool_input.get("status", ""))
             elif tool_name == "list_jira_epics":
                 return self._tool_list_jira_epics()
+            elif tool_name == "set_jira_epic":
+                return self._tool_set_jira_epic(tool_input["ticket_key"], tool_input["epic_key"])
+            elif tool_name == "remove_jira_from_epic":
+                return self._tool_remove_jira_from_epic(tool_input["ticket_key"])
             elif tool_name == "move_jira_ticket_to_sprint":
                 return self._tool_move_jira_ticket_to_sprint(
                     tool_input["ticket_key"],
@@ -501,6 +528,39 @@ You have tools to:
             p = i["fields"]["priority"]["name"]
             lines.append(f"[{i['key']}] {i['fields']['summary']} | {s} | {p}")
         return f"{len(issues)} ticket(s):\n" + "\n".join(lines)
+
+    def _tool_set_jira_epic(self, ticket_key: str, epic_key: str) -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        resp = requests.put(
+            f"{base_url}/rest/api/3/issue/{ticket_key}",
+            json={"fields": {"parent": {"key": epic_key}}},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp.status_code == 204:
+            return f"Set epic for {ticket_key} to {epic_key}"
+        # Fallback: try customfield_10014 for classic projects
+        resp2 = requests.put(
+            f"{base_url}/rest/api/3/issue/{ticket_key}",
+            json={"fields": {"customfield_10014": epic_key}},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp2.status_code == 204:
+            return f"Set epic for {ticket_key} to {epic_key}"
+        return f"Error setting epic: {resp.status_code} {resp.text}"
+
+    def _tool_remove_jira_from_epic(self, ticket_key: str) -> str:
+        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
+        resp = requests.put(
+            f"{base_url}/rest/api/3/issue/{ticket_key}",
+            json={"fields": {"parent": None}},
+            auth=self._jira_auth(),
+            headers={"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        if resp.status_code == 204:
+            return f"Removed {ticket_key} from its epic"
+        return f"Error removing from epic: {resp.status_code} {resp.text}"
 
     def _tool_list_jira_epics(self) -> str:
         base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
