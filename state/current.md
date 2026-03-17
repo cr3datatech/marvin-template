@@ -21,13 +21,14 @@ Last updated: 2026-03-17
 
 ## Open Threads
 
-- Delete ticket confirmation step not yet added to bots
+- Delete ticket/page confirmation step not yet added to bots (executes immediately)
 - Morning briefing via Telegram/Slack not yet set up
 
 ## Recent Context
 
 - Full Groot setup completed 2026-03-17
 - Jira REST API connected — all Tourno sprint tools working in Telegram and Slack
+- Confluence tools added to both bots: list spaces, list/read/create/update/delete pages
 - Confluence connected to all three spaces (CDS, CLOUD, tourno)
 - Telegram bot running as systemd service (groot-telegram)
 - Slack bot running as systemd service (groot-slack)

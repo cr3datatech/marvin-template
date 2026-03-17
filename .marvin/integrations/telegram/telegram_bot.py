@@ -8,6 +8,7 @@ A Telegram interface for MARVIN that can:
 """
 
 import base64
+import importlib.util
 import json
 import logging
 import os
@@ -53,246 +54,46 @@ logger = logging.getLogger(__name__)
 DB_PATH = SCRIPT_DIR / "telegram.db"
 CLAUDE_MD_PATH = MARVIN_ROOT / "CLAUDE.md"
 
-# Tool definitions for Claude
-TOOLS = [
-    {
-        "name": "read_file",
-        "description": "Read the contents of a file from the MARVIN workspace. Use this to retrieve markdown files, code, research notes, etc.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Path relative to MARVIN workspace (e.g., 'content/notes.md', 'state/current.md', 'CLAUDE.md')"
-                }
-            },
-            "required": ["path"]
-        }
-    },
-    {
-        "name": "write_file",
-        "description": "Create or update a file in the MARVIN workspace. Use this to save content, create new documents, update notes, etc.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Path relative to MARVIN workspace where to save the file"
-                },
-                "content": {
-                    "type": "string",
-                    "description": "The content to write to the file"
-                }
-            },
-            "required": ["path", "content"]
-        }
-    },
-    {
-        "name": "search_files",
-        "description": "Search for files by name pattern or content. Returns matching file paths.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search query - matches against filenames and content"
-                },
-                "file_pattern": {
-                    "type": "string",
-                    "description": "Optional glob pattern to filter files (e.g., '*.md', 'content/**/*.md')",
-                    "default": "**/*.md"
-                }
-            },
-            "required": ["query"]
-        }
-    },
-    {
-        "name": "list_directory",
-        "description": "List files and subdirectories in a directory.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Directory path relative to MARVIN workspace (e.g., 'content', 'state', 'sessions')",
-                    "default": "."
-                }
-            },
-            "required": []
-        }
-    },
-    {
-        "name": "append_to_file",
-        "description": "Append content to an existing file (useful for adding to inbox, logs, etc.)",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Path relative to MARVIN workspace"
-                },
-                "content": {
-                    "type": "string",
-                    "description": "Content to append"
-                }
-            },
-            "required": ["path", "content"]
-        }
-    },
-    {
-        "name": "fetch_url",
-        "description": "Fetch and extract content from a URL (YouTube transcripts, Reddit posts, articles, etc.)",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "url": {
-                    "type": "string",
-                    "description": "The URL to fetch content from"
-                }
-            },
-            "required": ["url"]
-        }
-    },
-    {
-        "name": "send_file",
-        "description": "Send a file from the MARVIN workspace as a Telegram attachment. Use this for long documents or any file the user asks for.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Path relative to MARVIN workspace (e.g., 'content/notes.md')"
-                },
-                "caption": {
-                    "type": "string",
-                    "description": "Optional caption to include with the file",
-                    "default": ""
-                }
-            },
-            "required": ["path"]
-        }
-    },
-    {
-        "name": "create_jira_ticket",
-        "description": "Create a new Jira ticket in the Tourno project (TF). Use this when the user wants to log a bug, story, or task.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "summary": {
-                    "type": "string",
-                    "description": "Short title of the ticket"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "Detailed description of the ticket",
-                    "default": ""
-                },
-                "issue_type": {
-                    "type": "string",
-                    "description": "Type of issue: Story, Bug, or Task",
-                    "enum": ["Story", "Bug", "Task"],
-                    "default": "Story"
-                },
-                "priority": {
-                    "type": "string",
-                    "description": "Priority: Highest, High, Medium, Low, Lowest",
-                    "enum": ["Highest", "High", "Medium", "Low", "Lowest"],
-                    "default": "Medium"
-                }
-            },
-            "required": ["summary"]
-        }
-    },
-    {
-        "name": "list_jira_tickets",
-        "description": "List tickets in the current Tourno sprint, optionally filtered by status.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "description": "Optional status filter: 'To Do', 'In Progress', 'Closed'",
-                    "default": ""
-                }
-            },
-            "required": []
-        }
-    },
-    {
-        "name": "delete_jira_ticket",
-        "description": "Permanently delete a Jira ticket. This cannot be undone.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticket_key": {"type": "string", "description": "Ticket to delete, e.g. TF-436"}
-            },
-            "required": ["ticket_key"]
-        }
-    },
-    {
-        "name": "transition_jira_ticket",
-        "description": "Move a Jira ticket through the workflow. Valid statuses: 'To Do', 'Implementation', 'Ready For Prod', 'Closed'.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticket_key": {"type": "string", "description": "Ticket to transition, e.g. TF-429"},
-                "status": {"type": "string", "description": "Target status: 'To Do', 'Implementation', 'Ready For Prod', or 'Closed'"}
-            },
-            "required": ["ticket_key", "status"]
-        }
-    },
-    {
-        "name": "set_jira_epic",
-        "description": "Add a Jira ticket to an epic. Provide the ticket key and epic key.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticket_key": {"type": "string", "description": "Ticket to update, e.g. TF-436"},
-                "epic_key": {"type": "string", "description": "Epic to assign it to, e.g. TF-351"}
-            },
-            "required": ["ticket_key", "epic_key"]
-        }
-    },
-    {
-        "name": "remove_jira_from_epic",
-        "description": "Remove a Jira ticket from its epic.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticket_key": {"type": "string", "description": "Ticket to remove from its epic, e.g. TF-436"}
-            },
-            "required": ["ticket_key"]
-        }
-    },
-    {
-        "name": "list_jira_epics",
-        "description": "List available epics in the Tourno Jira project.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": []
-        }
-    },
-    {
-        "name": "move_jira_ticket_to_sprint",
-        "description": "Move a Jira ticket to a sprint. If sprint_name is not provided or is empty, list available sprints so the user can choose.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "ticket_key": {
-                    "type": "string",
-                    "description": "The Jira ticket key, e.g. TF-429"
-                },
-                "sprint_name": {
-                    "type": "string",
-                    "description": "Name of the sprint to move the ticket to. Leave empty to list available sprints.",
-                    "default": ""
-                }
-            },
-            "required": ["ticket_key"]
-        }
-    }
-]
+
+class ToolLoader:
+    """Dynamically loads tool plugins from a directory."""
+
+    def __init__(self, tools_dirs: list):
+        self.tools_dirs = [Path(d) for d in tools_dirs]
+        self._plugins = {}   # tool_name -> execute callable
+        self._definitions = []
+        self.load()
+
+    def load(self):
+        self._plugins = {}
+        self._definitions = []
+        for tools_dir in self.tools_dirs:
+            if not tools_dir.exists():
+                continue
+            for path in sorted(tools_dir.glob("*.py")):
+                if path.name.startswith("_"):
+                    continue
+                try:
+                    spec = importlib.util.spec_from_file_location(f"groot_tools.{path.stem}", path)
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                    if hasattr(mod, "TOOL_DEFINITIONS") and hasattr(mod, "execute"):
+                        for defn in mod.TOOL_DEFINITIONS:
+                            self._plugins[defn["name"]] = mod.execute
+                            self._definitions.append(defn)
+                        logger.info(f"Loaded plugin: {path.name} ({len(mod.TOOL_DEFINITIONS)} tool(s))")
+                except Exception as e:
+                    logger.error(f"Failed to load plugin {path.name}: {e}", exc_info=True)
+
+    @property
+    def definitions(self):
+        return self._definitions
+
+    def execute(self, tool_name: str, tool_input: dict, context: dict) -> str:
+        if tool_name in self._plugins:
+            return self._plugins[tool_name](tool_name, tool_input, context)
+        return f"Unknown tool: {tool_name}"
+
 
 
 class ConversationStore:
@@ -396,6 +197,8 @@ class MARVINBot:
         self.fetcher = ContentFetcher()
         self.claude = anthropic.Anthropic()
         self._pending_files = []  # Files to send after response
+        tools_dirs = [SCRIPT_DIR / "tools"]
+        self.tool_loader = ToolLoader(tools_dirs)
 
         # Load MARVIN context
         self.system_prompt = self._build_system_prompt()
@@ -430,6 +233,39 @@ Key locations in the MARVIN workspace:
 - `content/` - Notes, drafts, content
 - `sessions/` - Daily session logs
 - `.claude/commands/` - Custom slash commands
+
+## Tool Plugin System
+You can create new tools using the `create_tool` meta-tool. Each plugin must follow this exact format:
+
+```python
+import requests  # or any stdlib/installed package
+
+TOOL_DEFINITIONS = [
+    {{
+        "name": "my_tool",
+        "description": "What this tool does",
+        "input_schema": {{
+            "type": "object",
+            "properties": {{
+                "param": {{"type": "string", "description": "Parameter description"}}
+            }},
+            "required": ["param"]
+        }}
+    }}
+]
+
+def execute(tool_name: str, tool_input: dict, context: dict) -> str:
+    if tool_name == "my_tool":
+        return _do_thing(tool_input["param"])
+    return f"Unknown tool: {{tool_name}}"
+
+def _do_thing(param: str) -> str:
+    # implementation
+    return "result"
+```
+
+Available packages: requests, anthropic, python-dotenv, and all Python stdlib.
+Context keys: groot_root (Path), validate_path (callable), bot_type (str).
 
 """
         # Add context from CLAUDE.md if available
@@ -483,382 +319,25 @@ Key locations in the MARVIN workspace:
         return file_path
 
     def _execute_tool(self, tool_name: str, tool_input: dict) -> str:
-        """Execute a tool and return the result."""
+        """Execute a tool via the plugin loader."""
+        context = {
+            "groot_root": MARVIN_ROOT,
+            "validate_path": self._validate_path,
+            "bot_type": "telegram",
+            "pending_files": self._pending_files,
+            "tools_dirs": [SCRIPT_DIR / "tools"],
+            "service_names": ["groot-slack", "groot-telegram"],
+            "fetcher": self.fetcher,
+        }
         try:
-            if tool_name == "read_file":
-                return self._tool_read_file(tool_input["path"])
-            elif tool_name == "write_file":
-                return self._tool_write_file(tool_input["path"], tool_input["content"])
-            elif tool_name == "search_files":
-                return self._tool_search_files(
-                    tool_input["query"],
-                    tool_input.get("file_pattern", "**/*.md")
-                )
-            elif tool_name == "list_directory":
-                return self._tool_list_directory(tool_input.get("path", "."))
-            elif tool_name == "append_to_file":
-                return self._tool_append_to_file(tool_input["path"], tool_input["content"])
-            elif tool_name == "fetch_url":
-                return self._tool_fetch_url(tool_input["url"])
-            elif tool_name == "send_file":
-                return self._tool_send_file(
-                    tool_input["path"],
-                    tool_input.get("caption", "")
-                )
-            elif tool_name == "create_jira_ticket":
-                return self._tool_create_jira_ticket(
-                    tool_input["summary"],
-                    tool_input.get("description", ""),
-                    tool_input.get("issue_type", "Story"),
-                    tool_input.get("priority", "Medium")
-                )
-            elif tool_name == "list_jira_tickets":
-                return self._tool_list_jira_tickets(tool_input.get("status", ""))
-            elif tool_name == "list_jira_epics":
-                return self._tool_list_jira_epics()
-            elif tool_name == "delete_jira_ticket":
-                return self._tool_delete_jira_ticket(tool_input["ticket_key"])
-            elif tool_name == "transition_jira_ticket":
-                return self._tool_transition_jira_ticket(tool_input["ticket_key"], tool_input["status"])
-            elif tool_name == "set_jira_epic":
-                return self._tool_set_jira_epic(tool_input["ticket_key"], tool_input["epic_key"])
-            elif tool_name == "remove_jira_from_epic":
-                return self._tool_remove_jira_from_epic(tool_input["ticket_key"])
-            elif tool_name == "move_jira_ticket_to_sprint":
-                return self._tool_move_jira_ticket_to_sprint(
-                    tool_input["ticket_key"],
-                    tool_input.get("sprint_name", "")
-                )
-            else:
-                return f"Unknown tool: {tool_name}"
+            return self.tool_loader.execute(tool_name, tool_input, context)
         except ValueError as e:
-            # Security-related errors (path validation) - log but return sanitized message
             logger.warning(f"Security violation in {tool_name}: {e}")
             return f"Error: {str(e)}"
         except Exception as e:
-            # Log full error internally, return sanitized message to user
-            logger.error(f"Tool execution error in {tool_name}: {e}", exc_info=True)
-            return f"Error executing {tool_name}. Check logs for details."
+            logger.error(f"Tool error in {tool_name}: {e}", exc_info=True)
+            return f"Error executing {tool_name}."
 
-    def _tool_read_file(self, path: str) -> str:
-        """Read a file from MARVIN workspace."""
-        file_path = self._validate_path(path)
-
-        if not file_path.exists():
-            return f"File not found: {path}"
-        if not file_path.is_file():
-            return f"Not a file: {path}"
-
-        content = file_path.read_text()
-        if len(content) > 10000:
-            return f"File content (truncated, {len(content)} chars total):\n{content[:10000]}..."
-        return content
-
-    def _tool_write_file(self, path: str, content: str) -> str:
-        """Write content to a file."""
-        # For write, we validate the parent directory exists within workspace
-        # (the file itself may not exist yet)
-        parent_path = self._validate_path(str(Path(path).parent) if Path(path).parent != Path('.') else '.')
-        file_path = parent_path / Path(path).name
-
-        # Create parent directories if needed
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_text(content)
-        return f"Successfully wrote {len(content)} chars to {path}"
-
-    def _tool_search_files(self, query: str, file_pattern: str = "**/*.md") -> str:
-        """Search for files by content or name."""
-        results = []
-        query_lower = query.lower()
-
-        for path in MARVIN_ROOT.glob(file_pattern):
-            if not path.is_file():
-                continue
-            # Skip hidden, venv, and node_modules
-            if any(part.startswith('.') or part in ('venv', 'node_modules') for part in path.parts):
-                continue
-
-            rel_path = path.relative_to(MARVIN_ROOT)
-
-            # Check filename
-            if query_lower in path.name.lower():
-                results.append(f"📄 {rel_path} (name match)")
-                continue
-
-            # Check content
-            try:
-                if path.stat().st_size < 100000:  # Skip large files
-                    content = path.read_text()
-                    if query_lower in content.lower():
-                        # Find a snippet
-                        idx = content.lower().find(query_lower)
-                        start = max(0, idx - 50)
-                        end = min(len(content), idx + len(query) + 50)
-                        snippet = content[start:end].replace('\n', ' ')
-                        results.append(f"📄 {rel_path}: ...{snippet}...")
-            except Exception:
-                pass
-
-        if not results:
-            return f"No files found matching '{query}'"
-
-        return f"Found {len(results)} result(s):\n" + "\n".join(results[:20])
-
-    def _tool_list_directory(self, path: str = ".") -> str:
-        """List contents of a directory."""
-        dir_path = self._validate_path(path)
-
-        if not dir_path.exists():
-            return f"Directory not found: {path}"
-        if not dir_path.is_dir():
-            return f"Not a directory: {path}"
-
-        items = []
-        for item in sorted(dir_path.iterdir()):
-            if item.name.startswith('.') or item.name in ('venv', 'node_modules'):
-                continue
-            if item.is_dir():
-                items.append(f"📁 {item.name}/")
-            else:
-                items.append(f"📄 {item.name}")
-
-        return f"Contents of {path}:\n" + "\n".join(items[:50])
-
-    def _tool_append_to_file(self, path: str, content: str) -> str:
-        """Append content to a file."""
-        # For append, validate parent directory for new files, or full path for existing
-        if (MARVIN_ROOT / path).exists():
-            file_path = self._validate_path(path)
-        else:
-            parent_path = self._validate_path(str(Path(path).parent) if Path(path).parent != Path('.') else '.')
-            file_path = parent_path / Path(path).name
-
-        if file_path.exists():
-            existing = file_path.read_text()
-            file_path.write_text(existing + "\n" + content)
-        else:
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.write_text(content)
-
-        return f"Appended {len(content)} chars to {path}"
-
-    def _jira_auth(self):
-        return (os.environ.get("JIRA_EMAIL", ""), os.environ.get("JIRA_API_TOKEN", ""))
-
-    def _tool_create_jira_ticket(self, summary: str, description: str = "", issue_type: str = "Story", priority: str = "Medium") -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        payload = {
-            "fields": {
-                "project": {"key": "TF"},
-                "summary": summary,
-                "description": {
-                    "type": "doc",
-                    "version": 1,
-                    "content": [{"type": "paragraph", "content": [{"type": "text", "text": description}]}]
-                } if description else None,
-                "issuetype": {"name": issue_type},
-                "priority": {"name": priority}
-            }
-        }
-        if not description:
-            del payload["fields"]["description"]
-        resp = requests.post(
-            f"{base_url}/rest/api/3/issue",
-            json=payload,
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code == 201:
-            data = resp.json()
-            return f"Created {data['key']}: {summary}\n{base_url}/browse/{data['key']}"
-        return f"Error creating ticket: {resp.status_code} {resp.text}"
-
-    def _tool_list_jira_tickets(self, status: str = "") -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        jql = 'project=TF AND sprint="tourno Q1 2026"'
-        if status:
-            jql += f' AND status="{status}"'
-        resp = requests.post(
-            f"{base_url}/rest/api/3/search/jql",
-            json={"jql": jql, "fields": ["summary", "status", "priority", "issuetype"], "maxResults": 50},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code != 200:
-            return f"Error fetching tickets: {resp.status_code}"
-        issues = resp.json().get("issues", [])
-        if not issues:
-            return "No tickets found."
-        lines = []
-        for i in issues:
-            s = i["fields"]["status"]["name"]
-            p = i["fields"]["priority"]["name"]
-            lines.append(f"[{i['key']}] {i['fields']['summary']} | {s} | {p}")
-        return f"{len(issues)} ticket(s):\n" + "\n".join(lines)
-
-    def _tool_delete_jira_ticket(self, ticket_key: str) -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        resp = requests.delete(
-            f"{base_url}/rest/api/3/issue/{ticket_key}",
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json"}
-        )
-        if resp.status_code == 204:
-            return f"Deleted {ticket_key}"
-        return f"Error deleting {ticket_key}: {resp.status_code} {resp.text}"
-
-    def _tool_transition_jira_ticket(self, ticket_key: str, status: str) -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        # Get available transitions
-        resp = requests.get(
-            f"{base_url}/rest/api/3/issue/{ticket_key}/transitions",
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json"}
-        )
-        if resp.status_code != 200:
-            return f"Error fetching transitions: {resp.status_code}"
-        transitions = resp.json().get("transitions", [])
-        # Match transition by name (case-insensitive)
-        transition = next((t for t in transitions if t["name"].lower() == status.lower()), None)
-        if not transition:
-            available = [t["name"] for t in transitions]
-            return f"Status '{status}' not available. Available transitions: {', '.join(available)}"
-        resp = requests.post(
-            f"{base_url}/rest/api/3/issue/{ticket_key}/transitions",
-            json={"transition": {"id": transition["id"]}},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code == 204:
-            return f"Moved {ticket_key} to '{transition['name']}'"
-        return f"Error transitioning {ticket_key}: {resp.status_code} {resp.text}"
-
-    def _tool_set_jira_epic(self, ticket_key: str, epic_key: str) -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        resp = requests.put(
-            f"{base_url}/rest/api/3/issue/{ticket_key}",
-            json={"fields": {"parent": {"key": epic_key}}},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code == 204:
-            return f"Set epic for {ticket_key} to {epic_key}"
-        # Fallback: try customfield_10014 for classic projects
-        resp2 = requests.put(
-            f"{base_url}/rest/api/3/issue/{ticket_key}",
-            json={"fields": {"customfield_10014": epic_key}},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp2.status_code == 204:
-            return f"Set epic for {ticket_key} to {epic_key}"
-        return f"Error setting epic: {resp.status_code} {resp.text}"
-
-    def _tool_remove_jira_from_epic(self, ticket_key: str) -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        resp = requests.put(
-            f"{base_url}/rest/api/3/issue/{ticket_key}",
-            json={"fields": {"parent": None}},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code == 204:
-            return f"Removed {ticket_key} from its epic"
-        return f"Error removing from epic: {resp.status_code} {resp.text}"
-
-    def _tool_list_jira_epics(self) -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        resp = requests.post(
-            f"{base_url}/rest/api/3/search/jql",
-            json={"jql": "project=TF AND issuetype=Epic ORDER BY created DESC", "fields": ["summary", "status"], "maxResults": 50},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code != 200:
-            return f"Error fetching epics: {resp.status_code}"
-        issues = resp.json().get("issues", [])
-        if not issues:
-            return "No epics found in the Tourno project."
-        lines = [f"[{i['key']}] {i['fields']['summary']} | {i['fields']['status']['name']}" for i in issues]
-        return f"{len(issues)} epic(s):\n" + "\n".join(lines)
-
-    def _tool_move_jira_ticket_to_sprint(self, ticket_key: str, sprint_name: str = "") -> str:
-        base_url = os.environ.get("JIRA_BASE_URL", "https://cr3data.atlassian.net")
-        resp = requests.get(
-            f"{base_url}/rest/agile/1.0/board/6/sprint",
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json"}
-        )
-        if resp.status_code != 200:
-            return f"Error fetching sprints: {resp.status_code}"
-        sprints = resp.json().get("values", [])
-        # If no sprint name given, list available sprints for the user to choose
-        if not sprint_name:
-            active = [s for s in sprints if s["state"] == "active"]
-            future = [s for s in sprints if s["state"] == "future"]
-            lines = []
-            if active:
-                lines.append("Active sprints:")
-                lines += [f"  • {s['name']}" for s in active]
-            if future:
-                lines.append("Future sprints:")
-                lines += [f"  • {s['name']}" for s in future]
-            return "Which sprint? Please specify the sprint name:\n" + "\n".join(lines)
-        sprint = next((s for s in sprints if s["name"].lower() == sprint_name.lower()), None)
-        if not sprint:
-            active = [s["name"] for s in sprints if s["state"] in ("active", "future")]
-            return f"Sprint '{sprint_name}' not found. Available: {', '.join(active)}"
-        sprint_id = sprint["id"]
-        resp = requests.post(
-            f"{base_url}/rest/agile/1.0/sprint/{sprint_id}/issue",
-            json={"issues": [ticket_key]},
-            auth=self._jira_auth(),
-            headers={"Accept": "application/json", "Content-Type": "application/json"}
-        )
-        if resp.status_code == 204:
-            return f"Moved {ticket_key} to sprint '{sprint['name']}'"
-        return f"Error moving ticket: {resp.status_code} {resp.text}"
-
-    def _tool_fetch_url(self, url: str) -> str:
-        """Fetch content from a URL."""
-        result = self.fetcher.fetch(url)
-
-        output = f"**{result.platform.upper()}**: {result.url}\n"
-        if result.title:
-            output += f"Title: {result.title}\n"
-        if result.author:
-            output += f"Author: {result.author}\n"
-        if result.error:
-            output += f"Error: {result.error}\n"
-        if result.content:
-            output += f"Content: {result.content[:2000]}\n"
-        if result.transcript:
-            if len(result.transcript) > 8000:
-                output += f"Transcript (truncated):\n{result.transcript[:8000]}...\n"
-            else:
-                output += f"Transcript:\n{result.transcript}\n"
-        if result.metadata:
-            output += f"Metadata: {json.dumps(result.metadata, indent=2)[:1000]}\n"
-
-        return output
-
-    def _tool_send_file(self, path: str, caption: str = "") -> str:
-        """Queue a file to be sent as Telegram attachment."""
-        file_path = self._validate_path(path)
-
-        if not file_path.exists():
-            return f"File not found: {path}"
-        if not file_path.is_file():
-            return f"Not a file: {path}"
-
-        # Queue file for sending after response
-        self._pending_files.append({
-            "path": file_path,
-            "caption": caption or f"📄 {file_path.name}",
-        })
-
-        file_size = file_path.stat().st_size
-        return f"Queued file for sending: {path} ({file_size:,} bytes)"
 
     async def _send_pending_files(self, update: Update):
         """Send any queued files as Telegram attachments."""
@@ -904,7 +383,7 @@ Key locations in the MARVIN workspace:
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
                 system=self.system_prompt,
-                tools=TOOLS,
+                tools=self.tool_loader.definitions,
                 messages=messages,
             )
 
@@ -956,7 +435,7 @@ Key locations in the MARVIN workspace:
                     model="claude-sonnet-4-20250514",
                     max_tokens=4096,
                     system=self.system_prompt,
-                    tools=TOOLS,
+                    tools=self.tool_loader.definitions,
                     messages=messages,
                 )
 
@@ -1047,7 +526,7 @@ Key locations in the MARVIN workspace:
         await update.message.reply_text(
             f"**MARVIN Status:**\n\n"
             f"• Messages in history: {len(history)}\n"
-            f"• Tools available: {len(TOOLS)}\n"
+            f"• Tools available: {len(self.tool_loader.definitions)}\n"
             f"• Authorized users: {len(self.allowed_user_ids)}",
             parse_mode="Markdown",
         )
@@ -1247,7 +726,7 @@ Conversation:
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
                 system=self.system_prompt,
-                tools=TOOLS,
+                tools=self.tool_loader.definitions,
                 messages=messages,
             )
 
@@ -1291,7 +770,7 @@ Conversation:
                     model="claude-sonnet-4-20250514",
                     max_tokens=4096,
                     system=self.system_prompt,
-                    tools=TOOLS,
+                    tools=self.tool_loader.definitions,
                     messages=messages,
                 )
 
