@@ -23,4 +23,4 @@ if [ ! -f "$VENV" ]; then
     exit 1
 fi
 
-"$VENV" "$SCRIPT_DIR/bot_auth.py"
+"$VENV" "$SCRIPT_DIR/bot_auth.py" "$@"
