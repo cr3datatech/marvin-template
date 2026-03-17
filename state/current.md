@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-16
+Last updated: 2026-03-17
 
 ## Active Priorities
 
@@ -21,13 +21,17 @@ Last updated: 2026-03-16
 
 ## Open Threads
 
-- Atlassian MCP OAuth not yet completed — needs SSH port-forward trick to auth
+- Delete ticket confirmation step not yet added to bots
+- Morning briefing via Telegram/Slack not yet set up
 
 ## Recent Context
 
-- Groot set up and running
-- Slack MCP working
-- Atlassian MCP configured but OAuth blocked by SSH/localhost issue — fix documented in session log 2026-03-16
+- Full Groot setup completed 2026-03-17
+- Jira REST API connected — all Tourno sprint tools working in Telegram and Slack
+- Confluence connected to all three spaces (CDS, CLOUD, tourno)
+- Telegram bot running as systemd service (groot-telegram)
+- Slack bot running as systemd service (groot-slack)
+- Memory backed up in git repo
 
 ---
 
