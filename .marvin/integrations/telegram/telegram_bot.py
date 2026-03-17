@@ -230,6 +230,7 @@ You have tools to:
 ## Directory Structure
 Key locations in the MARVIN workspace:
 - `state/` - Current state and goals (current.md, goals.md)
+- `memory/` - Cross-session memory
 - `content/` - Notes, drafts, content
 - `sessions/` - Daily session logs
 - `.claude/commands/` - Custom slash commands
