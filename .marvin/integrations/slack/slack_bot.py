@@ -285,12 +285,12 @@ Security, cost overrun, data privacy, failure modes — and how to address each.
 What to do after the initial build: measure, share, iterate.
 
 ## LinkedIn Post Draft
-Ready-to-publish post (see format below).
+Link to the LinkedIn subpage (created in Step 4).
 ```
 Include a link to the Idea Bank page at the top: https://cr3data.atlassian.net/wiki/spaces/CLOUD/pages/1245118465
 
 **Step 4 — LinkedIn Post Draft**
-Write directly in the Confluence page AND paste it in Slack for easy copy. Format:
+Create a **subpage** under the main Confluence page using `create_confluence_page` with the main page's ID as `parent_id`. Title the subpage `LinkedIn Post — [Idea Name]`. Write the full post as the page content. Then paste the post directly in Slack for easy copy. Format:
 - Hook (1 punchy line — a question, bold claim, or surprising stat)
 - What was built (the artifact) — specific, not vague
 - One key insight or lesson learned
