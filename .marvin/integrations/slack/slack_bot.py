@@ -216,6 +216,39 @@ def _do_thing(param: str) -> str:
 Available packages: requests, anthropic, python-dotenv, and all Python stdlib.
 Context keys: groot_root (Path), validate_path (callable), bot_type (str).
 
+## Project Context
+- **Tourno** — football tournament web app. Jira project: `TF`. Confluence space: `tourno`.
+- **Cloud Architect / CGI** — day job at CGI. Jira project: `CGI`. Confluence space: `CDS`.
+- **Professional Development** — certs and learning. Confluence space: `CLOUD`. No Jira project.
+- Atlassian instance: https://cr3data.atlassian.net
+
+## Workflows
+
+### Jira Ticket Defaults
+- **Always ask which project** before creating a ticket if the project wasn't specified — never assume TF or CGI
+- When asking any question with a fixed set of answers (project, status, sprint, etc.), always number the options so the user can reply with just a number
+- **Before creating a ticket**: once the project is known, use `search_jira_tickets` to search for similar existing tickets (use key words from the summary in the JQL `text ~` search). If similar tickets are found, show them and ask if the user wants to proceed with a new ticket or use an existing one. If nothing similar is found, proceed straight to creation.
+- Default issue type is always **Story** unless the user specifies otherwise
+- Always create tickets **without a sprint** (they land in the backlog) — never assign to a sprint unless explicitly asked
+- Never ask about sprint assignment after creating a ticket
+
+### CGI Jira + Confluence Workflow
+When the user asks to create a Jira ticket:
+1. If the user hasn't provided a description, ask for one before creating — you need both a summary (name) and a description
+2. Create the ticket using `create_jira_ticket` with the summary, description, and correct `project_key`, `issue_type: "Story"` (unless stated otherwise)
+3. Confirm the ticket was created (show the key and link)
+4. Ask: "Would you like me to create a Confluence page documenting this?"
+5. If yes: research using **both the ticket summary and description** as context, then create a well-structured page using `create_confluence_page` with the appropriate space key. Include a link to the Jira ticket at the top of the page content.
+6. After the Confluence page is created, use `add_jira_remote_link` to add the Confluence page URL to the Jira ticket
+7. Confirm both links are in place
+
+When researching for a Confluence page:
+- Use `fetch_url` to research the topic if a URL is provided
+- Write structured documentation with these sections: Overview, Key Concepts, How It Works, Use Cases / When to Use, Implementation Notes / Considerations, Pros & Cons, References
+- Each section should have meaningful content — not just a heading and one line. Aim for 2-5 sentences or bullet points per section minimum
+- Keep it practical and relevant to a cloud architect context
+- Think like a senior engineer documenting something for the team — thorough enough to be useful, not so long it becomes a textbook
+
 """
         if CLAUDE_MD_PATH.exists():
             try:
@@ -261,14 +294,30 @@ Context keys: groot_root (Path), validate_path (callable), bot_type (str).
             logger.error(f"Tool error in {tool_name}: {e}", exc_info=True)
             return f"Error executing {tool_name}."
 
+    def _select_model(self, message: str) -> str:
+        """Pick Haiku for simple lookups, Sonnet for reasoning/writing tasks."""
+        msg = message.lower()
+        sonnet_triggers = [
+            "create", "write", "research", "document", "confluence", "explain",
+            "analyse", "analyze", "plan", "design", "summarise", "summarize",
+            "draft", "generate", "build", "implement", "suggest", "review",
+            "compare", "why", "how does", "what is", "describe", "help me",
+            "ticket", "jira", "sprint", "epic",
+        ]
+        if any(t in msg for t in sonnet_triggers):
+            return "claude-sonnet-4-6"
+        return "claude-haiku-4-5-20251001"
+
     def generate_response(self, user_message: str, channel_id: str) -> str:
         history = self.store.get_history(channel_id)
         messages = [{"role": m["role"], "content": m["content"]} for m in history[-10:]]
         messages.append({"role": "user", "content": user_message})
+        model = self._select_model(user_message)
+        logger.info(f"Using model: {model}")
 
         try:
             response = self.claude.messages.create(
-                model="claude-sonnet-4-6",
+                model=model,
                 max_tokens=4096,
                 system=self.system_prompt,
                 tools=self.tool_loader.definitions,
@@ -293,7 +342,7 @@ Context keys: groot_root (Path), validate_path (callable), bot_type (str).
                 messages.append({"role": "assistant", "content": response.content})
                 messages.append({"role": "user", "content": tool_results})
                 response = self.claude.messages.create(
-                    model="claude-sonnet-4-6",
+                    model=model,
                     max_tokens=4096,
                     system=self.system_prompt,
                     tools=self.tool_loader.definitions,
