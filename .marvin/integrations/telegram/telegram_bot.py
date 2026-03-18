@@ -404,8 +404,7 @@ When researching for a Confluence page:
             "create", "write", "research", "document", "confluence", "explain",
             "analyse", "analyze", "plan", "design", "summarise", "summarize",
             "draft", "generate", "build", "implement", "suggest", "review",
-            "compare", "why", "how does", "what is", "describe", "help me",
-            "ticket", "jira", "sprint", "epic",
+            "compare", "why", "how does", "describe", "help me",
         ]
         if any(t in msg for t in sonnet_triggers):
             return "claude-sonnet-4-6"
