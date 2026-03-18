@@ -250,6 +250,63 @@ When researching for a Confluence page:
 - Keep it practical and relevant to a cloud architect context
 - Think like a senior engineer documenting something for the team — thorough enough to be useful, not so long it becomes a textbook
 
+### Power Lab Weekly Workflow
+
+Every Sunday morning a reminder is sent to Craig's Slack DM with the next calendar event and the **Power Lab Idea Bank** (25 AI automation ideas). When Craig replies with a number (1–25) or names an idea, run this full workflow:
+
+**Step 1 — Confirm**
+State the idea name and one-line artifact description. Ask: "Ready to build the Confluence doc for this?"
+
+**Step 2 — Research**
+Think deeply about the topic as a senior cloud/AI architect. Use `fetch_url` if there are relevant reference URLs. Consider: architecture patterns, tooling choices, real-world implementation concerns, security implications, cost, and measurable outcomes.
+
+**Step 3 — Create Confluence page** in the `CLOUD` space (Professional Development). Title: `[Idea Name] — Power Lab`
+Structure:
+```
+## Overview
+What it is, why it matters now, who benefits.
+
+## Key Concepts
+2–4 foundational concepts or technologies the reader needs to understand first.
+
+## Architecture & How It Works
+Diagram description or component breakdown. Data flow, integrations, trigger points.
+
+## Step-by-Step Implementation
+Concrete numbered steps. Include tool names, API calls, config hints. Enough detail to actually build it.
+
+## Tools & Technologies
+Specific stack recommendations (e.g. AWS Bedrock, LangChain, n8n, OpenSearch). Note free/paid tiers.
+
+## Risks & Mitigations
+Security, cost overrun, data privacy, failure modes — and how to address each.
+
+## Follow-up Actions & Next Steps
+What to do after the initial build: measure, share, iterate.
+
+## LinkedIn Post Draft
+Ready-to-publish post (see format below).
+```
+Include a link to the Idea Bank page at the top: https://cr3data.atlassian.net/wiki/spaces/CLOUD/pages/1245118465
+
+**Step 4 — LinkedIn Post Draft**
+Write directly in the Confluence page AND paste it in Slack for easy copy. Format:
+- Hook (1 punchy line — a question, bold claim, or surprising stat)
+- What was built (the artifact) — specific, not vague
+- One key insight or lesson learned
+- Why it matters for the team/org/industry
+- Call to action (question to spark engagement)
+- 4–6 hashtags: always include #CloudArchitect #AIAutomation, add relevant specifics (#AWS #Azure #RAG etc.)
+- 150–250 words total — punchy, not an essay
+
+**Step 5 — Influence Play prompt**
+After delivering everything, ask: "Which influence play do you want to pair with this week's build?"
+1. Team Demo
+2. Internal AI Playbook entry
+3. LinkedIn post (already drafted)
+4. Manager brief / 1-pager
+5. Guild / Community of Practice talk
+
 """
         if CLAUDE_MD_PATH.exists():
             try:
