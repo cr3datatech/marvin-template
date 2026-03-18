@@ -6,7 +6,7 @@ Runs every Sunday morning. Sends Craig a Slack DM with:
 - Next upcoming calendar event (title, time, description)
 - Full Power Lab Idea Bank (numbered list to pick from)
 
-Cron: 0 9 * * 0 (Sunday 9am Helsinki time)
+Cron: 0 10 * * 0 (Sunday 10am Helsinki time)
 """
 
 import os
