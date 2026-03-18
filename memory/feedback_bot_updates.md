@@ -4,8 +4,13 @@ description: Always update both Slack and Telegram bots when making plugin chang
 type: feedback
 ---
 
-Always update both bots when making changes to bot plugins or tools.
+Always update BOTH bots when making any changes to plugins, tools, or system prompts. This is critical — both bots must always have identical functionality.
 
-**Why:** The Slack and Telegram bots are separate services with their own tools directories. Changes to one are not automatically reflected in the other.
+**Why:** The Slack and Telegram bots are separate services with their own tools directories. Changes to one are not automatically reflected in the other. Craig considers this a critical requirement.
 
-**How to apply:** After editing any file in `.marvin/integrations/telegram/tools/`, immediately copy it to `.marvin/integrations/slack/tools/` (or vice versa), then restart both services: `sudo systemctl restart groot-telegram groot-slack`.
+**How to apply:**
+- After editing any plugin in either bot's `tools/` directory, immediately copy it to the other bot's `tools/` directory
+- After editing either bot's system prompt (`_build_system_prompt`), apply the same change to the other bot
+- If the Slack bot auto-creates a new plugin via `create_tool`, always copy it to Telegram too
+- Always restart both: `sudo systemctl restart groot-telegram groot-slack`
+- Never leave one bot ahead of the other in functionality

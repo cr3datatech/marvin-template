@@ -1,10 +1,12 @@
 # Current State
 
-Last updated: 2026-03-17 (session 6)
+Last updated: 2026-03-18 (session 7)
 
 ## Active Priorities
 
-### Cloud Architect (Day Job)
+### Cloud Architect (Day Job — CGI)
+- **Company:** CGI
+- **Role:** Cloud Architect / Cloud Advisory
 - See `state/cloud-architect.md`
 - Confluence: `CDS` (CGI Documentation)
 
@@ -14,9 +16,11 @@ Last updated: 2026-03-17 (session 6)
 - See `state/professional-dev.md`
 - Confluence: `CLOUD` (Cr3Data)
 
-### Tourno
+### Tourno (Cr3Data)
+- **Company:** Cr3Data
 - Q1 2026 sprint active — 5 tickets To Do
 - Jira project: `TF` | Confluence: `tourno`
+- Bitbucket: Cr3Data workspace
 - See `memory/project_tourno_jira.md`
 
 ## Open Threads
@@ -39,6 +43,7 @@ Last updated: 2026-03-17 (session 6)
 - Memory backed up in git repo
 - Google Workspace MCP added to Groot (Gmail, Drive, Calendar, Docs, Sheets, Slides)
 - Google Workspace plugin built for both bots — pending one-time OAuth auth
+- User profile created: memory/profile.md (Cr3Data = Tourno, CGI = Cloud Architect)
 
 ---
 
