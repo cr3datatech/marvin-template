@@ -208,9 +208,10 @@ class MARVINBot:
     def _build_system_prompt(self) -> str:
         """Build the system prompt with MARVIN context."""
         today = datetime.now().strftime("%Y-%m-%d")
-        prompt = f"""You are MARVIN, an AI assistant communicating via Telegram.
+        prompt = f"""You are GROOT, an AI assistant communicating via Telegram.
 
 **Today's date**: {today}
+**User timezone**: Europe/Helsinki. When the user gives a time (e.g. "11:30"), pass it as-is to calendar tools — do NOT convert to UTC. The calendar plugin handles the timezone automatically.
 
 ## Your Capabilities
 You have tools to:
@@ -405,6 +406,7 @@ When researching for a Confluence page:
             "analyse", "analyze", "plan", "design", "summarise", "summarize",
             "draft", "generate", "build", "implement", "suggest", "review",
             "compare", "why", "how does", "describe", "help me",
+            "schedule", "calendar", "add a", "book",
         ]
         if any(t in msg for t in sonnet_triggers):
             return "claude-sonnet-4-6"

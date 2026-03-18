@@ -60,19 +60,36 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "calendar_list_events",
-        "description": "List upcoming events from Google Calendar",
+        "description": "List Google Calendar events. Supports past, present and future events, date ranges, and filtering by name/title.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "days_ahead": {
                     "type": "integer",
-                    "description": "How many days ahead to look (default 7)",
+                    "description": "How many days ahead to look (default 7). Ignored if time_min is set.",
                     "default": 7,
+                },
+                "days_back": {
+                    "type": "integer",
+                    "description": "How many days in the past to look (default 0). Set to fetch past events.",
+                    "default": 0,
+                },
+                "time_min": {
+                    "type": "string",
+                    "description": "Start of date range in ISO 8601 format (e.g. 2025-01-01T00:00:00). Overrides days_back.",
+                },
+                "time_max": {
+                    "type": "string",
+                    "description": "End of date range in ISO 8601 format. Overrides days_ahead.",
+                },
+                "search": {
+                    "type": "string",
+                    "description": "Filter events by title/name (case-insensitive substring match).",
                 },
                 "max_results": {
                     "type": "integer",
-                    "description": "Max number of events to return (default 20)",
-                    "default": 20,
+                    "description": "Max number of events to return (default 50)",
+                    "default": 50,
                 },
             },
             "required": [],
@@ -104,6 +121,47 @@ TOOL_DEFINITIONS = [
                 },
             },
             "required": ["title", "start_datetime", "end_datetime"],
+        },
+    },
+    {
+        "name": "calendar_update_event",
+        "description": "Update an existing Google Calendar event. Get the event ID from calendar_list_events.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "event_id": {"type": "string", "description": "The event ID from calendar_list_events"},
+                "title": {"type": "string", "description": "New event title"},
+                "start_datetime": {"type": "string", "description": "New start time in ISO 8601 format"},
+                "end_datetime": {"type": "string", "description": "New end time in ISO 8601 format"},
+                "description": {"type": "string", "description": "New event description"},
+                "location": {"type": "string", "description": "New event location"},
+            },
+            "required": ["event_id"],
+        },
+    },
+    {
+        "name": "calendar_delete_event",
+        "description": "Delete a Google Calendar event. Get the event ID from calendar_list_events.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "event_id": {"type": "string", "description": "The event ID to delete"},
+            },
+            "required": ["event_id"],
+        },
+    },
+    {
+        "name": "calendar_get_event",
+        "description": "Get full details of a single Google Calendar event by ID, including full description, attendees, conferencing info, and all metadata.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": "string",
+                    "description": "The event ID from calendar_list_events",
+                }
+            },
+            "required": ["event_id"],
         },
     },
     {
@@ -238,6 +296,12 @@ def execute(tool_name: str, tool_input: dict, context: dict) -> str:
         return _calendar_list(creds, tool_input)
     elif tool_name == "calendar_create_event":
         return _calendar_create(creds, tool_input)
+    elif tool_name == "calendar_update_event":
+        return _calendar_update(creds, tool_input)
+    elif tool_name == "calendar_delete_event":
+        return _calendar_delete(creds, tool_input["event_id"])
+    elif tool_name == "calendar_get_event":
+        return _calendar_get_event(creds, tool_input["event_id"])
     elif tool_name == "drive_search_files":
         return _drive_search(creds, tool_input)
     elif tool_name == "drive_read_file":
@@ -364,39 +428,57 @@ def _calendar_list(creds, tool_input: dict) -> str:
 
         service = build("calendar", "v3", credentials=creds)
         now = datetime.utcnow()
-        time_max = now + timedelta(days=tool_input.get("days_ahead", 7))
+
+        if tool_input.get("time_min"):
+            time_min = tool_input["time_min"]
+            if not time_min.endswith("Z"):
+                time_min += "Z"
+        else:
+            days_back = tool_input.get("days_back", 0)
+            time_min = (now - timedelta(days=days_back)).isoformat() + "Z"
+
+        if tool_input.get("time_max"):
+            time_max = tool_input["time_max"]
+            if not time_max.endswith("Z"):
+                time_max += "Z"
+        else:
+            time_max = (now + timedelta(days=tool_input.get("days_ahead", 7))).isoformat() + "Z"
 
         result = service.events().list(
             calendarId="primary",
-            timeMin=now.isoformat() + "Z",
-            timeMax=time_max.isoformat() + "Z",
-            maxResults=tool_input.get("max_results", 20),
+            timeMin=time_min,
+            timeMax=time_max,
+            maxResults=tool_input.get("max_results", 50),
             singleEvents=True,
             orderBy="startTime",
         ).execute()
 
         events = result.get("items", [])
+
+        # Filter by name if requested
+        search = tool_input.get("search", "").lower()
+        if search:
+            events = [e for e in events if search in e.get("summary", "").lower()]
+
         if not events:
-            return "No upcoming events."
+            return "No events found."
 
         lines = []
         for e in events:
             start = e["start"].get("dateTime", e["start"].get("date", ""))
             end = e["end"].get("dateTime", e["end"].get("date", ""))
-            attendees = [a["email"] for a in e.get("attendees", [])]
-            line = (
-                f"• {e.get('summary', '(no title)')}\n"
-                f"  Start: {start}\n"
-                f"  End: {end}"
-            )
-            if attendees:
-                line += f"\n  Attendees: {', '.join(attendees)}"
+            line = f"• {e.get('summary', '(no title)')}\n  Start: {start}\n  End: {end}"
             if e.get("location"):
                 line += f"\n  Location: {e['location']}"
+            attendees = [a["email"] for a in e.get("attendees", [])]
+            if attendees:
+                line += f"\n  Attendees: {', '.join(attendees)}"
+            if e.get("description"):
+                line += f"\n  Description: {e['description'][:300]}"
             line += f"\n  ID: {e['id']}"
             lines.append(line)
 
-        return f"Upcoming events ({len(events)}):\n\n" + "\n\n".join(lines)
+        return f"{len(events)} event(s) found:\n\n" + "\n\n".join(lines)
     except Exception as e:
         return f"Calendar error: {e}"
 
@@ -408,8 +490,8 @@ def _calendar_create(creds, tool_input: dict) -> str:
         service = build("calendar", "v3", credentials=creds)
         event = {
             "summary": tool_input["title"],
-            "start": {"dateTime": tool_input["start_datetime"], "timeZone": "UTC"},
-            "end": {"dateTime": tool_input["end_datetime"], "timeZone": "UTC"},
+            "start": {"dateTime": tool_input["start_datetime"], "timeZone": "Europe/Helsinki"},
+            "end": {"dateTime": tool_input["end_datetime"], "timeZone": "Europe/Helsinki"},
         }
         if tool_input.get("description"):
             event["description"] = tool_input["description"]
@@ -424,6 +506,82 @@ def _calendar_create(creds, tool_input: dict) -> str:
         )
     except Exception as e:
         return f"Error creating event: {e}"
+
+
+def _calendar_update(creds, tool_input: dict) -> str:
+    try:
+        from googleapiclient.discovery import build
+
+        service = build("calendar", "v3", credentials=creds)
+        event_id = tool_input["event_id"]
+        existing = service.events().get(calendarId="primary", eventId=event_id).execute()
+
+        if tool_input.get("title"):
+            existing["summary"] = tool_input["title"]
+        if tool_input.get("start_datetime"):
+            existing["start"] = {"dateTime": tool_input["start_datetime"], "timeZone": "Europe/Helsinki"}
+        if tool_input.get("end_datetime"):
+            existing["end"] = {"dateTime": tool_input["end_datetime"], "timeZone": "Europe/Helsinki"}
+        if tool_input.get("description"):
+            existing["description"] = tool_input["description"]
+        if tool_input.get("location"):
+            existing["location"] = tool_input["location"]
+
+        updated = service.events().update(calendarId="primary", eventId=event_id, body=existing).execute()
+        return f"Event updated: '{updated.get('summary')}'\nID: {updated['id']}"
+    except Exception as e:
+        return f"Error updating event: {e}"
+
+
+def _calendar_delete(creds, event_id: str) -> str:
+    try:
+        from googleapiclient.discovery import build
+
+        service = build("calendar", "v3", credentials=creds)
+        service.events().delete(calendarId="primary", eventId=event_id).execute()
+        return f"Event {event_id} deleted."
+    except Exception as e:
+        return f"Error deleting event: {e}"
+
+
+def _calendar_get_event(creds, event_id: str) -> str:
+    try:
+        from googleapiclient.discovery import build
+
+        service = build("calendar", "v3", credentials=creds)
+        e = service.events().get(calendarId="primary", eventId=event_id).execute()
+
+        start = e["start"].get("dateTime", e["start"].get("date", ""))
+        end = e["end"].get("dateTime", e["end"].get("date", ""))
+
+        lines = [
+            f"Title: {e.get('summary', '(no title)')}",
+            f"Start: {start}",
+            f"End: {end}",
+            f"Status: {e.get('status', '')}",
+        ]
+        if e.get("location"):
+            lines.append(f"Location: {e['location']}")
+        if e.get("description"):
+            lines.append(f"Description:\n{e['description']}")
+        attendees = e.get("attendees", [])
+        if attendees:
+            att_lines = [f"  - {a.get('displayName', a['email'])} <{a['email']}> ({a.get('responseStatus', '?')})" for a in attendees]
+            lines.append("Attendees:\n" + "\n".join(att_lines))
+        conf = e.get("conferenceData", {})
+        if conf:
+            entry_points = conf.get("entryPoints", [])
+            for ep in entry_points:
+                if ep.get("entryPointType") == "video":
+                    lines.append(f"Video call: {ep.get('uri', '')}")
+        lines.append(f"ID: {e['id']}")
+        lines.append(f"Created: {e.get('created', '')}")
+        lines.append(f"Updated: {e.get('updated', '')}")
+        lines.append(f"Organizer: {e.get('organizer', {}).get('email', '')}")
+
+        return "\n".join(lines)
+    except Exception as e:
+        return f"Error fetching event: {e}"
 
 
 # ── Drive ─────────────────────────────────────────────────────────────────────
