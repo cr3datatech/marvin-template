@@ -92,6 +92,24 @@ TOOL_DEFINITIONS = [
         }
     },
     {
+        "name": "stop_bitbucket_pipeline",
+        "description": "Stop/cancel a running Bitbucket pipeline by its build number.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "repo_slug": {
+                    "type": "string",
+                    "description": "Repository slug, e.g. 'tourno'"
+                },
+                "build_number": {
+                    "type": "integer",
+                    "description": "The build number of the pipeline to stop (visible in list_bitbucket_pipelines output)"
+                }
+            },
+            "required": ["repo_slug", "build_number"]
+        }
+    },
+    {
         "name": "list_bitbucket_pipeline_definitions",
         "description": "List the pipeline definitions available to run in a repo by reading its bitbucket-pipelines.yml. Shows default, branches, pull-requests, and custom pipelines.",
         "input_schema": {
@@ -146,6 +164,8 @@ def execute(tool_name: str, tool_input: dict, context: dict) -> str:
         return _get_pr(tool_input["repo_slug"], tool_input["pr_id"])
     elif tool_name == "list_bitbucket_pipelines":
         return _list_pipelines(tool_input["repo_slug"], tool_input.get("limit", 10))
+    elif tool_name == "stop_bitbucket_pipeline":
+        return _stop_pipeline(tool_input["repo_slug"], tool_input["build_number"])
     elif tool_name == "list_bitbucket_pipeline_definitions":
         return _list_pipeline_definitions(tool_input["repo_slug"], tool_input.get("branch", "main"))
     elif tool_name == "run_bitbucket_pipeline":
@@ -232,6 +252,28 @@ def _list_pipelines(repo_slug: str, limit: int) -> str:
         branch = p.get("target", {}).get("ref_name", "unknown")
         lines.append(f"• #{p['build_number']} [{status}] — {branch} ({p['created_on'][:10]})")
     return f"Recent pipelines for `{repo_slug}`:\n" + "\n".join(lines)
+
+
+def _stop_pipeline(repo_slug: str, build_number: int) -> str:
+    # First get the pipeline UUID from the build number
+    url = f"{BASE_URL}/repositories/{BITBUCKET_WORKSPACE}/{repo_slug}/pipelines/"
+    resp = requests.get(url, auth=_auth(), params={"pagelen": 50, "sort": "-created_on"})
+    if resp.status_code != 200:
+        return f"Error fetching pipelines: {resp.status_code} {resp.text}"
+    pipelines = resp.json().get("values", [])
+    pipeline = next((p for p in pipelines if p.get("build_number") == build_number), None)
+    if not pipeline:
+        return f"Pipeline #{build_number} not found in '{repo_slug}'."
+    state = pipeline.get("state", {}).get("name", "")
+    if state not in ("IN_PROGRESS", "PENDING", "RUNNING"):
+        result = pipeline.get("state", {}).get("result", {}).get("name", state)
+        return f"Pipeline #{build_number} is not running (state: {result}). Nothing to stop."
+    pipeline_uuid = pipeline["uuid"]
+    stop_url = f"{BASE_URL}/repositories/{BITBUCKET_WORKSPACE}/{repo_slug}/pipelines/{pipeline_uuid}/stopPipeline"
+    resp = requests.post(stop_url, auth=_auth())
+    if resp.status_code == 204:
+        return f"Stopped pipeline #{build_number} in '{repo_slug}'."
+    return f"Error stopping pipeline #{build_number}: {resp.status_code} {resp.text}"
 
 
 def _list_pipeline_definitions(repo_slug: str, branch: str = "main") -> str:
