@@ -175,7 +175,7 @@ def send_telegram(message: str):
         return
     resp = requests.post(
         f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-        json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"},
+        json={"chat_id": TELEGRAM_CHAT_ID, "text": message},
         timeout=10,
     )
     if resp.ok:
