@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-18 (session 7)
+Last updated: 2026-03-20 (session 8)
 
 ## Active Priorities
 
@@ -34,6 +34,9 @@ Last updated: 2026-03-18 (session 7)
 
 ## Recent Context
 
+- Tourno error log automation built: Drive folders created, cron running Tue/Thu 9am, email to support@tourno.fi, files renamed after processing (error_log_YYYYMMDDHHmm)
+- Google Workspace MCP auth working for cr3data.tech@gmail.com (Drive + Gmail confirmed)
+- Cron is session-only — standalone script needed for persistence
 - Full Groot setup completed 2026-03-17
 - Jira REST API connected — all Tourno sprint tools working in Telegram and Slack
 - Confluence tools added to both bots: list spaces, list/read/create/update/delete pages
@@ -42,7 +45,8 @@ Last updated: 2026-03-18 (session 7)
 - Slack bot running as systemd service (groot-slack)
 - Memory backed up in git repo
 - Google Workspace MCP added to Groot (Gmail, Drive, Calendar, Docs, Sheets, Slides)
-- Google Workspace plugin built for both bots — pending one-time OAuth auth
+- Google Workspace MCP auth completed for cr3data.tech@gmail.com
+- Tourno error log automation active (Tue/Thu cron, Drive → email → rename)
 - User profile created: memory/profile.md (Cr3Data = Tourno, CGI = Cloud Architect)
 
 ---
