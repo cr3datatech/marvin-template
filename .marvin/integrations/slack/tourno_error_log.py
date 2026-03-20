@@ -189,7 +189,8 @@ def send_telegram(message: str):
 def main():
     from googleapiclient.discovery import build
 
-    now = datetime.now()
+    from zoneinfo import ZoneInfo
+    now = datetime.now(ZoneInfo("Europe/Helsinki"))
     timestamp = now.strftime("%Y%m%d%H%M")
     today_label = now.strftime("%Y-%m-%d")
 
