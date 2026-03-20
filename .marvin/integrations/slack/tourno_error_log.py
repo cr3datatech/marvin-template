@@ -5,39 +5,43 @@ Tourno Error Log Analyser
 Runs every Tuesday and Thursday at 9am Helsinki time.
 - Checks Google Drive for error_log files in tourno_error_logs/frontend and backend
 - Reads, parses and deduplicates errors
-- Sends HTML summary email to support@tourno.fi
+- Sends summary to Slack DM and Telegram
 - Renames processed files to error_log_YYYYMMDDHHmm
 
 Cron: 3 9 * * 2,4 TZ=Europe/Helsinki
 """
 
-import base64
 import json
 import logging
+import os
 import re
+import requests
 from collections import Counter
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 SCRIPT_DIR = Path(__file__).parent
 GROOT_ROOT = SCRIPT_DIR.parent.parent.parent
+
+load_dotenv(SCRIPT_DIR / ".env")
+load_dotenv(GROOT_ROOT / ".env")
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 GOOGLE_TOKEN_PATH = Path.home() / ".config" / "groot" / "google_token.json"
-GOOGLE_SCOPES = [
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/gmail.send",
-]
-
-GOOGLE_EMAIL = "cr3data.tech@gmail.com"
-RECIPIENT_EMAIL = "support@tourno.fi"
+GOOGLE_SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 FRONTEND_FOLDER_ID = "1UEaoIvi98G__7L03rpeRF6cN-r2Phsdo"
 BACKEND_FOLDER_ID = "141Q31L5FaZLwWqR0SOId-U085ASi8iVQ"
+
+SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
+SLACK_USER_ID = "U083MA2K6US"
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = "1684738468"
 
 
 # ── Google auth ────────────────────────────────────────────────────────────────
@@ -50,7 +54,6 @@ def get_credentials():
     if not creds.valid:
         if creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            # Save refreshed token
             token_data = json.loads(GOOGLE_TOKEN_PATH.read_text())
             token_data["token"] = creds.token
             token_data["expiry"] = creds.expiry.isoformat() if creds.expiry else ""
@@ -64,7 +67,6 @@ def get_credentials():
 # ── Drive helpers ──────────────────────────────────────────────────────────────
 
 def find_error_log(drive_service, folder_id: str) -> dict | None:
-    """Return file metadata if error_log exists in folder, else None."""
     result = drive_service.files().list(
         q=f"name = 'error_log' and '{folder_id}' in parents and trashed = false",
         fields="files(id, name, size)",
@@ -75,13 +77,11 @@ def find_error_log(drive_service, folder_id: str) -> dict | None:
 
 
 def read_file_content(drive_service, file_id: str) -> str:
-    """Download and return file content as string."""
     content = drive_service.files().get_media(fileId=file_id).execute()
     return content.decode("utf-8", errors="replace")
 
 
 def rename_file(drive_service, file_id: str, timestamp: str):
-    """Rename file to error_log_YYYYMMDDHHmm."""
     new_name = f"error_log_{timestamp}"
     drive_service.files().update(fileId=file_id, body={"name": new_name}).execute()
     logger.info(f"Renamed file {file_id} → {new_name}")
@@ -89,16 +89,10 @@ def rename_file(drive_service, file_id: str, timestamp: str):
 
 # ── Log parsing ────────────────────────────────────────────────────────────────
 
-def parse_log(content: str) -> list[dict]:
-    """
-    Parse PHP error log lines. Returns list of unique errors with counts.
-    Each entry: {count, severity, message, location}
-    """
-    # Match log lines: [date] PHP <severity>: <message> in <file> on line <n>
+def parse_log(content: str):
     line_pattern = re.compile(
         r"\[\d{2}-\w{3}-\d{4} [\d:]+[^\]]*\] (PHP \w[\w ]+?):\s+(.+?)(?:\s+in\s+(/[^\s]+)\s+on\s+line\s+(\d+))?$"
     )
-
     raw_errors: Counter = Counter()
     dates = []
 
@@ -106,157 +100,88 @@ def parse_log(content: str) -> list[dict]:
         line = line.strip()
         if not line:
             continue
-
-        # Capture date range
         date_match = re.match(r"\[(\d{2}-\w{3}-\d{4})", line)
         if date_match:
             dates.append(date_match.group(1))
-
         m = line_pattern.match(line)
         if not m:
             continue
-
-        severity = m.group(1).strip()       # e.g. "PHP Warning", "PHP Fatal error"
+        severity = m.group(1).strip()
         message = m.group(2).strip()
         file_path = m.group(3) or ""
         line_no = m.group(4) or ""
-
-        # Normalize: strip full server path prefix
         file_short = re.sub(r"^/home/[^/]+/public_html/", "", file_path)
-
-        # Deduplicate key: severity + message + file + line
-        key = (severity, message, file_short, line_no)
-        raw_errors[key] += 1
+        raw_errors[(severity, message, file_short, line_no)] += 1
 
     errors = []
     for (severity, message, file_short, line_no), count in raw_errors.most_common():
         location = f"{file_short}:{line_no}" if file_short else ""
-        errors.append({
-            "count": count,
-            "severity": severity,
-            "message": message,
-            "location": location,
-        })
+        errors.append({"count": count, "severity": severity, "message": message, "location": location})
 
-    date_range = ""
-    if dates:
-        date_range = f"{dates[0]} – {dates[-1]}"
-
+    date_range = f"{dates[0]} – {dates[-1]}" if dates else ""
     return errors, date_range
 
 
-# ── Email building ─────────────────────────────────────────────────────────────
+# ── Message building ───────────────────────────────────────────────────────────
 
-SEVERITY_COLOUR = {
-    "PHP Fatal error": "#c0392b",
-    "PHP Warning": "#e67e22",
-    "PHP Notice": "#2980b9",
-}
+def build_message(frontend_info, backend_info, today_label: str) -> str:
+    lines = [f"*Tourno Error Log — {today_label}*\n"]
 
-def severity_label(sev: str) -> str:
-    colour = SEVERITY_COLOUR.get(sev, "#555")
-    short = sev.replace("PHP ", "")
-    return f'<span style="color:{colour};font-weight:bold">{short}</span>'
+    for label, info in [("Frontend", frontend_info), ("Backend", backend_info)]:
+        lines.append(f"*{label}:*")
+        if info is None:
+            lines.append("  No error log found.")
+        elif not info.get("content", "").strip():
+            lines.append("  Error log is empty.")
+        else:
+            errors, date_range = parse_log(info["content"])
+            if not errors:
+                lines.append("  Error log is empty.")
+            else:
+                fatals = sum(e["count"] for e in errors if "Fatal" in e["severity"])
+                warnings = sum(e["count"] for e in errors if "Warning" in e["severity"])
+                lines.append(f"  {len(errors)} unique errors — {fatals} fatals, {warnings} warnings")
+                for e in errors[:3]:
+                    lines.append(f"  • [{e['count']}x] {e['severity'].replace('PHP ', '')} — {e['message'][:80]}")
+                if len(errors) > 3:
+                    lines.append(f"  …and {len(errors) - 3} more")
+        lines.append("")
+
+    return "\n".join(lines)
 
 
-def build_section(label: str, file_info: dict | None) -> str:
-    """Build HTML for one log section (frontend or backend)."""
-    html = f"<h3>{label}</h3>\n"
+# ── Notifications ──────────────────────────────────────────────────────────────
 
-    if file_info is None:
-        return html + "<p>No new error log found in this folder.</p>\n"
-
-    content = file_info.get("content", "")
-    if not content or not content.strip():
-        return html + "<p>Error log is empty — no errors recorded.</p>\n"
-
-    errors, date_range = parse_log(content)
-    if not errors:
-        return html + "<p>Error log is empty — no errors recorded.</p>\n"
-
-    if date_range:
-        html += f'<p style="color:#888;font-size:0.9em">{date_range}</p>\n'
-
-    html += (
-        '<table border="1" cellpadding="6" cellspacing="0" '
-        'style="border-collapse:collapse;width:100%">\n'
-        '<tr style="background:#f5f5f5">'
-        "<th>#</th><th>Severity</th><th>Error</th><th>Location</th>"
-        "</tr>\n"
+def send_slack(message: str):
+    if not SLACK_BOT_TOKEN:
+        logger.warning("SLACK_BOT_TOKEN not set — skipping Slack")
+        return
+    resp = requests.post(
+        "https://slack.com/api/chat.postMessage",
+        headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}", "Content-Type": "application/json"},
+        json={"channel": SLACK_USER_ID, "text": message, "mrkdwn": True},
+        timeout=10,
     )
-    for e in errors:
-        html += (
-            f"<tr>"
-            f"<td>{e['count']}x</td>"
-            f"<td>{severity_label(e['severity'])}</td>"
-            f"<td><code>{e['message'][:120]}</code></td>"
-            f"<td>{e['location']}</td>"
-            f"</tr>\n"
-        )
-    html += "</table>\n"
-    return html
-
-
-def build_top_priority(frontend_info, backend_info) -> str:
-    """Build top priority section from all errors combined."""
-    all_errors = []
-    for info in [frontend_info, backend_info]:
-        if info and info.get("content", "").strip():
-            errors, _ = parse_log(info["content"])
-            all_errors.extend(errors)
-
-    if not all_errors:
-        return ""
-
-    # Sort by count, filter to fatals first, then by count
-    fatals = sorted(
-        [e for e in all_errors if "Fatal" in e["severity"]],
-        key=lambda x: x["count"], reverse=True
-    )[:3]
-
-    if not fatals:
-        top = sorted(all_errors, key=lambda x: x["count"], reverse=True)[:3]
+    data = resp.json()
+    if data.get("ok"):
+        logger.info("Slack message sent.")
     else:
-        top = fatals
-
-    html = "<h3>Top Priority</h3><ol>\n"
-    for e in top:
-        html += f"<li><strong>{e['count']}x {e['severity']}</strong> — <code>{e['message'][:100]}</code>"
-        if e["location"]:
-            html += f" <em>({e['location']})</em>"
-        html += "</li>\n"
-    html += "</ol>\n"
-    return html
+        logger.error(f"Slack error: {data.get('error')}")
 
 
-def build_email(frontend_info, backend_info, today: str) -> str:
-    fe_section = build_section("Frontend Errors", frontend_info)
-    be_section = build_section("Backend Errors", backend_info)
-    priority = build_top_priority(frontend_info, backend_info)
-
-    return f"""<p>Hi Craig,</p>
-<p>Here's the error log summary for Tourno.</p>
-<hr>
-{fe_section}
-<hr>
-{be_section}
-{"<hr>" + priority if priority else ""}
-<hr>
-<p><em>Sent by Groot</em></p>"""
-
-
-# ── Gmail send ─────────────────────────────────────────────────────────────────
-
-def send_email(gmail_service, subject: str, html_body: str):
-    msg = MIMEMultipart("alternative")
-    msg["To"] = RECIPIENT_EMAIL
-    msg["From"] = f"Groot <{GOOGLE_EMAIL}>"
-    msg["Subject"] = subject
-    msg.attach(MIMEText(html_body, "html"))
-
-    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
-    gmail_service.users().messages().send(userId="me", body={"raw": raw}).execute()
-    logger.info(f"Email sent to {RECIPIENT_EMAIL}")
+def send_telegram(message: str):
+    if not TELEGRAM_BOT_TOKEN:
+        logger.warning("TELEGRAM_BOT_TOKEN not set — skipping Telegram")
+        return
+    resp = requests.post(
+        f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+        json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"},
+        timeout=10,
+    )
+    if resp.ok:
+        logger.info("Telegram message sent.")
+    else:
+        logger.error(f"Telegram error: {resp.text}")
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -272,32 +197,25 @@ def main():
 
     creds = get_credentials()
     drive = build("drive", "v3", credentials=creds)
-    gmail = build("gmail", "v1", credentials=creds)
 
-    # Check for files
     fe_meta = find_error_log(drive, FRONTEND_FOLDER_ID)
     be_meta = find_error_log(drive, BACKEND_FOLDER_ID)
 
-    # Read content where files exist
     frontend_info = None
     backend_info = None
 
     if fe_meta:
-        logger.info(f"Frontend error_log found: {fe_meta['id']} ({fe_meta.get('size', 0)} bytes)")
-        content = read_file_content(drive, fe_meta["id"])
-        frontend_info = {"id": fe_meta["id"], "content": content}
+        logger.info(f"Frontend error_log found ({fe_meta.get('size', 0)} bytes)")
+        frontend_info = {"id": fe_meta["id"], "content": read_file_content(drive, fe_meta["id"])}
 
     if be_meta:
-        logger.info(f"Backend error_log found: {be_meta['id']} ({be_meta.get('size', 0)} bytes)")
-        content = read_file_content(drive, be_meta["id"])
-        backend_info = {"id": be_meta["id"], "content": content}
+        logger.info(f"Backend error_log found ({be_meta.get('size', 0)} bytes)")
+        backend_info = {"id": be_meta["id"], "content": read_file_content(drive, be_meta["id"])}
 
-    # Build and send email
-    subject = f"Tourno Error Log Summary — {today_label}"
-    body = build_email(frontend_info, backend_info, today_label)
-    send_email(gmail, subject, body)
+    message = build_message(frontend_info, backend_info, today_label)
+    send_slack(message)
+    send_telegram(message)
 
-    # Rename processed files
     if frontend_info:
         rename_file(drive, frontend_info["id"], timestamp)
     if backend_info:
