@@ -1,5 +1,4 @@
-# Todo
+# ToDo
 
-- [ ] Create a system whereby tools can be added via slack and telegram
-
-- Add Git integration (commit & push via Slack/Telegram)
+## Bots & Tools
+- [ ] Add ability to read Jira comments (get_jira_comments tool)
