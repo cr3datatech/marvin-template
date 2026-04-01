@@ -225,5 +225,19 @@ def main():
     logger.info("Done.")
 
 
+def send_failure_alert(exc: Exception):
+    msg = f"⚠️ Tourno error log run FAILED\n\n{type(exc).__name__}: {exc}\n\nCheck the log and re-run OAuth if the Google token has expired."
+    send_telegram(msg)
+    send_slack(msg)
+
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        try:
+            send_failure_alert(e)
+        except Exception as notify_err:
+            logger.error(f"Failed to send failure alert: {notify_err}")
+        raise
