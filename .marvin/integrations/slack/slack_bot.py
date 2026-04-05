@@ -352,6 +352,15 @@ After delivering everything, ask: "Which influence play do you want to pair with
             logger.error(f"Tool error in {tool_name}: {e}", exc_info=True)
             return f"Error executing {tool_name}."
 
+    def _call_model(self, model: str, messages: list, max_tokens: int = 4096, tools: list = None, system: str = None):
+        """Centralised model call — single place to swap provider or add logging."""
+        kwargs = {"model": model, "max_tokens": max_tokens, "messages": messages}
+        if system is not None:
+            kwargs["system"] = system
+        if tools is not None:
+            kwargs["tools"] = tools
+        return self.claude.messages.create(**kwargs)
+
     def _select_model(self, message: str) -> str:
         """Pick Haiku for simple lookups, Sonnet for reasoning/writing tasks."""
         msg = message.lower()
@@ -374,12 +383,11 @@ After delivering everything, ask: "Which influence play do you want to pair with
         logger.info(f"Using model: {model}")
 
         try:
-            response = self.claude.messages.create(
+            response = self._call_model(
                 model=model,
-                max_tokens=4096,
+                messages=messages,
                 system=self.system_prompt,
                 tools=self.tool_loader.definitions,
-                messages=messages,
             )
 
             max_iterations = 10
@@ -399,12 +407,11 @@ After delivering everything, ask: "Which influence play do you want to pair with
                     })
                 messages.append({"role": "assistant", "content": response.content})
                 messages.append({"role": "user", "content": tool_results})
-                response = self.claude.messages.create(
+                response = self._call_model(
                     model=model,
-                    max_tokens=4096,
+                    messages=messages,
                     system=self.system_prompt,
                     tools=self.tool_loader.definitions,
-                    messages=messages,
                 )
 
             text_blocks = [b.text for b in response.content if hasattr(b, 'text')]

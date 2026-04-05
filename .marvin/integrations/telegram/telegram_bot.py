@@ -203,7 +203,14 @@ class MARVINBot:
         # Load MARVIN context
         self.system_prompt = self._build_system_prompt()
 
-        logger.info(f"Bot initialized with {len(allowed_user_ids)} authorized user(s)")
+    def _call_model(self, model: str, messages: list, max_tokens: int = 4096, tools: list = None, system: str = None):
+        """Centralised model call — single place to swap provider or add logging."""
+        kwargs = {"model": model, "max_tokens": max_tokens, "messages": messages}
+        if system is not None:
+            kwargs["system"] = system
+        if tools is not None:
+            kwargs["tools"] = tools
+        return self.claude.messages.create(**kwargs)
 
     def _build_system_prompt(self) -> str:
         """Build the system prompt with MARVIN context."""
@@ -487,12 +494,11 @@ After delivering everything, ask: "Which influence play do you want to pair with
 
         try:
             # Initial API call
-            response = self.claude.messages.create(
+            response = self._call_model(
                 model=model,
-                max_tokens=4096,
+                messages=messages,
                 system=self.system_prompt,
                 tools=self.tool_loader.definitions,
-                messages=messages,
             )
 
             # Handle tool use loop with max iterations to prevent infinite loops
@@ -539,12 +545,11 @@ After delivering everything, ask: "Which influence play do you want to pair with
                 messages.append({"role": "assistant", "content": response.content})
                 messages.append({"role": "user", "content": tool_results})
 
-                response = self.claude.messages.create(
+                response = self._call_model(
                     model=model,
-                    max_tokens=4096,
+                    messages=messages,
                     system=self.system_prompt,
                     tools=self.tool_loader.definitions,
-                    messages=messages,
                 )
 
             if iteration >= max_tool_iterations:
@@ -679,7 +684,7 @@ Conversation:
 {conversation_text}"""
 
         try:
-            response = self.claude.messages.create(
+            response = self._call_model(
                 model="claude-haiku-4-5-20251001",
                 max_tokens=1024,
                 messages=[{"role": "user", "content": summary_prompt}],
@@ -830,12 +835,11 @@ Conversation:
             })
 
             # Call Claude with vision
-            response = self.claude.messages.create(
+            response = self._call_model(
                 model="claude-sonnet-4-6",
-                max_tokens=4096,
+                messages=messages,
                 system=self.system_prompt,
                 tools=self.tool_loader.definitions,
-                messages=messages,
             )
 
             # Handle tool use loop (same as text messages)
@@ -874,12 +878,11 @@ Conversation:
                 messages.append({"role": "assistant", "content": response.content})
                 messages.append({"role": "user", "content": tool_results})
 
-                response = self.claude.messages.create(
+                response = self._call_model(
                     model="claude-sonnet-4-6",
-                    max_tokens=4096,
+                    messages=messages,
                     system=self.system_prompt,
                     tools=self.tool_loader.definitions,
-                    messages=messages,
                 )
 
             # Extract text response
