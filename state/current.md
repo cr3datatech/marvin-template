@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-20 (session 8)
+Last updated: 2026-04-05
 
 ## Active Priorities
 
@@ -26,6 +26,7 @@ Last updated: 2026-03-20 (session 8)
 ## Open Threads
 
 - Delete ticket/page confirmation step not yet added to bots (executes immediately)
+- Slack bot system prompt is frozen at startup — state file changes not picked up until restart. `/reload` command not yet implemented.
 - Morning briefing via Telegram/Slack not yet set up
 - claude-mem parked for future consideration — full stack (worker, Chroma, hooks) deemed too heavy for now
 - Google Workspace fully connected — Gmail, Calendar, Drive, Photos available in both bots
