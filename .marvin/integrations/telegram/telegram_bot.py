@@ -195,7 +195,9 @@ class MARVINBot:
         self.allowed_user_ids = allowed_user_ids
         self.store = ConversationStore(DB_PATH)
         self.fetcher = ContentFetcher()
-        self.claude = anthropic.Anthropic()
+        self.claude = anthropic.Anthropic(
+            default_headers={"anthropic-beta": "prompt-caching-2024-07-31"}
+        )
         self._pending_files = []  # Files to send after response
         tools_dirs = [SCRIPT_DIR / "tools"]
         self.tool_loader = ToolLoader(tools_dirs)
@@ -207,7 +209,7 @@ class MARVINBot:
         """Centralised model call — single place to swap provider or add logging."""
         kwargs = {"model": model, "max_tokens": max_tokens, "messages": messages}
         if system is not None:
-            kwargs["system"] = system
+            kwargs["system"] = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
         if tools is not None:
             kwargs["tools"] = tools
         return self.claude.messages.create(**kwargs)
