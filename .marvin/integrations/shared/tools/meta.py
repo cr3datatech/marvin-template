@@ -70,15 +70,11 @@ def _create_tool(filename: str, code: str, context: dict) -> str:
     if "TOOL_DEFINITIONS" not in code or "def execute(" not in code:
         return "Error: plugin code must define TOOL_DEFINITIONS and execute() function"
 
-    # Write to both bots
-    script_dir = Path(__file__).parent.parent  # integrations/slack or integrations/telegram
-    integrations_dir = script_dir.parent       # integrations/
-    written = []
-    for bot_dir in ["slack", "telegram"]:
-        target = integrations_dir / bot_dir / "tools" / f"{filename}.py"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(code)
-        written.append(str(target))
+    # Write to shared/tools so both bots pick it up automatically
+    shared_tools_dir = Path(__file__).parent  # shared/tools/
+    target = shared_tools_dir / f"{filename}.py"
+    target.write_text(code)
+    written = [str(target)]
 
     # Restart both services after a short delay
     service_names = context.get("service_names", ["groot-slack", "groot-telegram"])
@@ -114,21 +110,16 @@ def _list_tools(context: dict) -> str:
 
 def _delete_tool(filename: str, context: dict) -> str:
     filename = re.sub(r"[^a-z0-9_]", "_", filename.lower().rstrip(".py"))
-    protected = {"workspace", "jira", "confluence", "fetch_url", "send_file", "meta"}
+    protected = {"workspace", "jira", "confluence", "fetch_url", "meta"}
     if filename in protected:
         return f"Error: cannot delete built-in plugin '{filename}'"
 
-    script_dir = Path(__file__).parent.parent
-    integrations_dir = script_dir.parent
-    deleted = []
-    for bot_dir in ["slack", "telegram"]:
-        target = integrations_dir / bot_dir / "tools" / f"{filename}.py"
-        if target.exists():
-            target.unlink()
-            deleted.append(str(target))
-
-    if not deleted:
-        return f"Plugin '{filename}.py' not found in either bot."
+    shared_tools_dir = Path(__file__).parent  # shared/tools/
+    target = shared_tools_dir / f"{filename}.py"
+    if not target.exists():
+        return f"Plugin '{filename}.py' not found in shared/tools/."
+    target.unlink()
+    deleted = [str(target)]
 
     service_names = context.get("service_names", ["groot-slack", "groot-telegram"])
 

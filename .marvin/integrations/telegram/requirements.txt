@@ -1,10 +1,7 @@
-# MARVIN Telegram Bot Dependencies
+# Groot Telegram Bot Dependencies
 
 # Telegram
 python-telegram-bot>=21.0
-
-# Anthropic API
-anthropic>=0.40.0
 
 # Content fetching
 requests>=2.31.0

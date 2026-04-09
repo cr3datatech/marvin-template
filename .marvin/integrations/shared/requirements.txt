@@ -1,17 +1,16 @@
-# Groot Slack Bot Dependencies
+# Groot Shared MCP Server Dependencies
 
-# Slack
-slack-bolt>=1.18.0
-slack-sdk>=3.26.0
+# MCP protocol
+mcp>=1.0.0
 
-# Content fetching
+# Content fetching (for fetch_url tool)
 requests>=2.31.0
 youtube-transcript-api>=0.6.0
 
 # Environment
 python-dotenv>=1.0.0
 
-# Google Workspace
+# Google Workspace (for google_workspace tool)
 google-auth>=2.0.0
 google-auth-oauthlib>=1.0.0
 google-api-python-client>=2.0.0

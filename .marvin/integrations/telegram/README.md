@@ -153,7 +153,7 @@ This integration has **full access** to your MARVIN workspace:
 
 This integration runs as a standalone Python process (not an MCP server). It:
 - Uses the `python-telegram-bot` library for Telegram API
-- Calls Claude directly via the Anthropic SDK with tool use
+- Calls Claude via `shared/model_client.py` — a shared wrapper used by both the Slack and Telegram bots
 - Stores conversation history in SQLite (`telegram.db`)
 - Has access to your MARVIN workspace for file operations
 
@@ -166,6 +166,7 @@ This integration runs as a standalone Python process (not an MCP server). It:
 | `requirements.txt` | Python dependencies |
 | `setup.sh` | Installation script |
 | `run.sh` | Start script |
+| `../shared/model_client.py` | Shared Anthropic client (used by Slack and Telegram bots) |
 
 ---
 

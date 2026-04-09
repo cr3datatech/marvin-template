@@ -1,21 +1,17 @@
-"""Groot Slack Bot with Tool Use.
+"""Groot Slack Bot.
 
-A Slack interface for Groot that can:
-- Read and write files in the Groot workspace
-- Search the codebase
-- Fetch content from links (YouTube, Reddit, etc.)
-- Execute tasks on your behalf
+A Slack interface for Groot that delegates all tool use and model calls
+to the Claude CLI (groot-tools MCP server). Uses Claude Pro plan — no API key required.
 """
 
-import importlib.util
-import json
 import logging
 import os
 import re
 import sqlite3
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
-import requests
 
 from dotenv import load_dotenv
 
@@ -30,7 +26,8 @@ load_dotenv(GROOT_ROOT / ".env")
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-import anthropic
+sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
+from model_client import build_prompt, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -39,50 +36,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Paths
 DB_PATH = SCRIPT_DIR / "slack.db"
 CLAUDE_MD_PATH = GROOT_ROOT / "CLAUDE.md"
-
-class ToolLoader:
-    """Dynamically loads tool plugins from a directory."""
-
-    def __init__(self, tools_dirs: list):
-        self.tools_dirs = [Path(d) for d in tools_dirs]
-        self._plugins = {}   # tool_name -> execute callable
-        self._definitions = []
-        self.load()
-
-    def load(self):
-        self._plugins = {}
-        self._definitions = []
-        for tools_dir in self.tools_dirs:
-            if not tools_dir.exists():
-                continue
-            for path in sorted(tools_dir.glob("*.py")):
-                if path.name.startswith("_"):
-                    continue
-                try:
-                    spec = importlib.util.spec_from_file_location(f"groot_tools.{path.stem}", path)
-                    mod = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(mod)
-                    if hasattr(mod, "TOOL_DEFINITIONS") and hasattr(mod, "execute"):
-                        for defn in mod.TOOL_DEFINITIONS:
-                            self._plugins[defn["name"]] = mod.execute
-                            self._definitions.append(defn)
-                        logger.info(f"Loaded plugin: {path.name} ({len(mod.TOOL_DEFINITIONS)} tool(s))")
-                except Exception as e:
-                    logger.error(f"Failed to load plugin {path.name}: {e}", exc_info=True)
-
-    @property
-    def definitions(self):
-        return self._definitions
-
-    def execute(self, tool_name: str, tool_input: dict, context: dict) -> str:
-        if tool_name in self._plugins:
-            return self._plugins[tool_name](tool_name, tool_input, context)
-        return f"Unknown tool: {tool_name}"
-
-
 
 
 class ConversationStore:
@@ -147,15 +102,10 @@ class ConversationStore:
 
 
 class GrootSlackBot:
-    """Groot Slack Bot with tool use."""
+    """Groot Slack Bot — uses Claude CLI with groot-tools MCP server."""
 
     def __init__(self):
         self.store = ConversationStore(DB_PATH)
-        self.claude = anthropic.Anthropic(
-            default_headers={"anthropic-beta": "prompt-caching-2024-07-31"}
-        )
-        tools_dirs = [SCRIPT_DIR / "tools"]
-        self.tool_loader = ToolLoader(tools_dirs)
         self.system_prompt = self._build_system_prompt()
         logger.info("Groot Slack bot initialized")
 
@@ -216,7 +166,7 @@ def _do_thing(param: str) -> str:
     return "result"
 ```
 
-Available packages: requests, anthropic, python-dotenv, and all Python stdlib.
+Available packages: requests, python-dotenv, and all Python stdlib.
 Context keys: groot_root (Path), validate_path (callable), bot_type (str).
 
 ## Project Context
@@ -322,105 +272,34 @@ After delivering everything, ask: "Which influence play do you want to pair with
 
         return prompt
 
-    def _validate_path(self, path: str) -> Path:
-        file_path = (GROOT_ROOT / path).resolve()
-        try:
-            file_path.relative_to(GROOT_ROOT.resolve())
-        except ValueError:
-            raise ValueError("Access denied: path outside workspace")
-        if file_path.is_symlink():
-            target = file_path.resolve()
-            try:
-                target.relative_to(GROOT_ROOT.resolve())
-            except ValueError:
-                raise ValueError("Access denied: symlink points outside workspace")
-        return file_path
-
-    def _execute_tool(self, tool_name: str, tool_input: dict) -> str:
-        context = {
-            "groot_root": GROOT_ROOT,
-            "validate_path": self._validate_path,
-            "bot_type": "slack",
-            "pending_files": [],
-            "tools_dirs": [SCRIPT_DIR / "tools"],
-            "service_names": ["groot-slack", "groot-telegram"],
-        }
-        try:
-            return self.tool_loader.execute(tool_name, tool_input, context)
-        except ValueError as e:
-            logger.warning(f"Security violation in {tool_name}: {e}")
-            return f"Error: {str(e)}"
-        except Exception as e:
-            logger.error(f"Tool error in {tool_name}: {e}", exc_info=True)
-            return f"Error executing {tool_name}."
-
-    def _call_model(self, model: str, messages: list, max_tokens: int = 4096, tools: list = None, system: str = None):
-        """Centralised model call — single place to swap provider or add logging."""
-        kwargs = {"model": model, "max_tokens": max_tokens, "messages": messages}
-        if system is not None:
-            kwargs["system"] = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
-        if tools is not None:
-            kwargs["tools"] = tools
-        return self.claude.messages.create(**kwargs)
-
-    def _select_model(self, message: str) -> str:
-        """Pick Haiku for simple lookups, Sonnet for reasoning/writing tasks."""
-        msg = message.lower()
-        sonnet_triggers = [
-            "create", "write", "research", "document", "confluence", "explain",
-            "analyse", "analyze", "plan", "design", "summarise", "summarize",
-            "draft", "generate", "build", "implement", "suggest", "review",
-            "compare", "why", "how does", "describe", "help me",
-            "schedule", "calendar", "add a", "book",
-        ]
-        if any(t in msg for t in sonnet_triggers):
-            return "claude-sonnet-4-6"
-        return "claude-haiku-4-5-20251001"
-
     def generate_response(self, user_message: str, channel_id: str) -> str:
         history = self.store.get_history(channel_id)
-        messages = [{"role": m["role"], "content": m["content"]} for m in history[-10:]]
-        messages.append({"role": "user", "content": user_message})
-        model = self._select_model(user_message)
+        model = select_model(user_message)
+        prompt = build_prompt(user_message, history)
         logger.info(f"Using model: {model}")
 
         try:
-            response = self._call_model(
-                model=model,
-                messages=messages,
-                system=self.system_prompt,
-                tools=self.tool_loader.definitions,
+            result = subprocess.run(
+                [
+                    "claude", "-p", prompt,
+                    "--system-prompt", self.system_prompt,
+                    "--model", model,
+                    "--tools", "",
+                    "--output-format", "text",
+                    "--no-session-persistence",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=120,
             )
-
-            max_iterations = 10
-            iteration = 0
-
-            while response.stop_reason == "tool_use" and iteration < max_iterations:
-                iteration += 1
-                tool_uses = [b for b in response.content if b.type == "tool_use"]
-                tool_results = []
-                for tool_use in tool_uses:
-                    logger.info(f"Executing tool: {tool_use.name}")
-                    result = self._execute_tool(tool_use.name, tool_use.input)
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": tool_use.id,
-                        "content": result,
-                    })
-                messages.append({"role": "assistant", "content": response.content})
-                messages.append({"role": "user", "content": tool_results})
-                response = self._call_model(
-                    model=model,
-                    messages=messages,
-                    system=self.system_prompt,
-                    tools=self.tool_loader.definitions,
-                )
-
-            text_blocks = [b.text for b in response.content if hasattr(b, 'text')]
-            return "\n".join(text_blocks) if text_blocks else "Done."
-
+            if result.returncode != 0:
+                logger.error(f"Claude CLI error: {result.stderr}")
+                return "Sorry, I encountered an error."
+            return result.stdout.strip() or "Done."
+        except subprocess.TimeoutExpired:
+            return "Sorry, the response timed out."
         except Exception as e:
-            logger.error(f"Claude API error: {e}")
+            logger.error(f"Error running Claude CLI: {e}")
             return f"Sorry, I encountered an error: {str(e)}"
 
 
@@ -437,7 +316,6 @@ def main():
 
     @app.event("message")
     def handle_dm(event, say, logger):
-        # Only respond to DMs (channel type 'im'), ignore bot messages
         if event.get("channel_type") != "im":
             return
         if event.get("bot_id"):
@@ -449,7 +327,6 @@ def main():
 
         channel_id = event["channel"]
 
-        # Handle commands
         if user_message.lower() == "/clear":
             groot.store.clear_history(channel_id)
             say("Conversation history cleared.")
@@ -457,19 +334,13 @@ def main():
 
         if user_message.lower() == "/status":
             history = groot.store.get_history(channel_id)
-            say(f"*Groot Status*\n• Messages in history: {len(history)}\n• Tools available: {len(groot.tool_loader.definitions)}")
+            say(f"*Groot Status*\n• Messages in history: {len(history)}")
             return
 
-        # Store user message
         groot.store.add_message(channel_id, "user", user_message)
-
-        # Generate response
         response = groot.generate_response(user_message, channel_id)
-
-        # Store and send response
         groot.store.add_message(channel_id, "assistant", response)
 
-        # Split if too long for Slack (max ~4000 chars)
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
                 say(response[i:i + 4000])
@@ -478,7 +349,6 @@ def main():
 
     @app.event("app_mention")
     def handle_mention(event, say, logger):
-        # Strip the mention from the message
         text = re.sub(r"<@[A-Z0-9]+>", "", event.get("text", "")).strip()
         if not text:
             say("Hey! How can I help?")
