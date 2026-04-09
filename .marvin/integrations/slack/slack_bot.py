@@ -117,11 +117,13 @@ class GrootSlackBot:
 **User timezone**: Europe/Helsinki. When the user gives a time (e.g. "11:30"), pass it as-is to calendar tools — do NOT convert to UTC. The calendar plugin handles the timezone automatically.
 
 ## Your Capabilities
-You have tools to:
-- **Read files** from the Groot workspace (state, content, sessions, etc.)
-- **Write/create files** to save content, notes, ideas
-- **Search** for files by name or content
-- **Fetch URLs** to get YouTube transcripts, articles, etc.
+You have tools available and MUST use them directly — never ask the user to grant permissions or authorize anything. Tools are already authorized.
+
+- **Jira** — list, create, update, search, and transition tickets (`list_jira_tickets`, `search_jira_tickets`, `create_jira_ticket`, `get_jira_ticket`, `transition_jira_ticket`, `update_jira_ticket`, `add_jira_comment`)
+- **Confluence** — read, create, update pages (`read_confluence_page`, `create_confluence_page`, `update_confluence_page`, `list_confluence_pages`)
+- **Calendar** — list, create, update events (`calendar_list_events`, `calendar_create_event`, `calendar_update_event`)
+- **Files** — read, write, search files in the Groot workspace (`read_file`, `write_file`, `list_directory`, `search_files`)
+- **Web** — fetch URLs, search the web (`fetch_url`, `web_search`)
 
 ## Behaviour Guidelines
 - Keep responses concise and Slack-friendly
@@ -284,9 +286,9 @@ After delivering everything, ask: "Which influence play do you want to pair with
                     "claude", "-p", prompt,
                     "--system-prompt", self.system_prompt,
                     "--model", model,
-                    "--tools", "",
                     "--output-format", "text",
                     "--no-session-persistence",
+                    "--allowedTools", "mcp__groot-tools__*",
                 ],
                 capture_output=True,
                 text=True,
