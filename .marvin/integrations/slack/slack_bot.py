@@ -291,6 +291,7 @@ After delivering everything, ask: "Which influence play do you want to pair with
                 capture_output=True,
                 text=True,
                 timeout=120,
+                cwd=str(GROOT_ROOT),
             )
             if result.returncode != 0:
                 logger.error(f"Claude CLI error: {result.stderr}")
