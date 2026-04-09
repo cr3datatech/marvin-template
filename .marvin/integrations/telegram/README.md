@@ -24,7 +24,7 @@ Anyone who wants MARVIN accessible from their phone. Perfect for:
 
 - Python 3.10+
 - A Telegram account
-- An Anthropic API key (`ANTHROPIC_API_KEY` in your environment)
+- Claude Code CLI installed and authenticated
 
 ## Setup
 
@@ -86,7 +86,6 @@ Set these in `.env` or your environment:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `TELEGRAM_BOT_TOKEN` | Yes | Bot token from BotFather |
-| `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
 | `TELEGRAM_ALLOWED_USERS` | **Yes** | Comma-separated user IDs for authorization |
 
 ### User Authorization (Required)
@@ -138,7 +137,7 @@ This integration has **full access** to your MARVIN workspace:
 **Bot not responding**
 - Ensure the bot process is running
 - Check that `TELEGRAM_BOT_TOKEN` is set correctly
-- Verify `ANTHROPIC_API_KEY` is valid
+- Verify Claude Code CLI is installed and authenticated (`claude --version`)
 
 **"Could not fetch transcript" for YouTube**
 - Some videos have transcripts disabled
@@ -153,7 +152,7 @@ This integration has **full access** to your MARVIN workspace:
 
 This integration runs as a standalone Python process (not an MCP server). It:
 - Uses the `python-telegram-bot` library for Telegram API
-- Calls Claude via `shared/model_client.py` — a shared wrapper used by both the Slack and Telegram bots
+- Calls Claude via the Claude CLI (`claude -p`) — uses your Claude Pro plan, no API key required
 - Stores conversation history in SQLite (`telegram.db`)
 - Has access to your MARVIN workspace for file operations
 

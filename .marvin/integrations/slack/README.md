@@ -1,22 +1,24 @@
 # Slack Integration
 
-Connect MARVIN to your Slack workspace.
+Connect Groot to Slack for a full AI assistant experience in your workspace.
 
 ## What It Does
 
-- **Read messages** - View channel history, search conversations
-- **Send messages** - Post to channels and threads
-- **Search** - Find messages across your workspace
-- **Channels** - List and browse public/private channels
+- **Chat with Groot** - Full conversational AI via Slack DMs or @mentions
+- **Read/write files** - Access your Groot workspace from Slack
+- **Fetch URLs** - Get YouTube transcripts, articles, etc.
+- **Jira + Confluence workflows** - Create tickets, build docs, search issues
+- **Power Lab workflow** - Sunday automation for weekly content creation
+- **Conversation history** - Context persists across messages
 
 ## Who It's For
 
-Teams that use Slack for communication and want MARVIN to help search through conversations, track discussions, or post updates.
+Anyone who wants Groot accessible from Slack — capturing ideas, running workflows, or managing tasks without leaving the app.
 
 ## Prerequisites
 
-- A Slack workspace where you have permission to create apps
-- Admin approval may be required for some workspaces
+- Python 3.10+
+- A Slack workspace where you can create apps
 
 ## Setup
 
@@ -25,76 +27,107 @@ Teams that use Slack for communication and want MARVIN to help search through co
 ```
 
 The script will guide you through:
-1. Creating a Slack App in your workspace
-2. Adding the required permissions (OAuth scopes)
-3. Installing the app and getting your token
-4. Configuring the MCP server
+1. Creating a Slack app with Socket Mode enabled
+2. Adding the required bot permissions
+3. Enabling event subscriptions
+4. Installing Python dependencies and configuring tokens
 
-## Required Slack Permissions
+## Running the Bot
 
-The setup script will ask you to add these User Token Scopes:
+After setup, start the bot:
 
-| Scope | What It Allows |
-|-------|----------------|
-| `channels:history` | Read messages in public channels |
-| `channels:read` | View basic channel info |
-| `chat:write` | Send messages |
-| `groups:history` | Read messages in private channels |
-| `groups:read` | View private channel info |
-| `im:history` | Read direct messages |
-| `im:read` | View DM info |
-| `mpim:history` | Read group DMs |
-| `mpim:read` | View group DM info |
-| `search:read` | Search messages |
-| `users:read` | View user info |
+```bash
+./.marvin/integrations/slack/run.sh
+```
+
+Or run directly:
+
+```bash
+cd .marvin/integrations/slack
+source venv/bin/activate
+python slack_bot.py
+```
+
+**Tip:** Run in a tmux session or as a background process on your VPS to keep it available.
 
 ## Try It
 
-After setup, try these commands with MARVIN:
+After setup, in Slack:
 
-- "List my Slack channels"
-- "Search Slack for meeting notes from last week"
-- "Show recent messages in #engineering"
-- "What's been discussed about the API migration?"
-- "Send a message to #general saying 'Good morning team!'"
+- DM Groot directly: "What's in my current state?"
+- @mention in a channel: "@Groot summarise this week's Jira tickets"
+- Share a link: "Summarise this YouTube video: [url]"
+- "Create a Jira story for [description]"
+- "What's been happening in [Confluence space]?"
 
-## Multiple Workspaces
+## Bot Commands
 
-You can connect multiple Slack workspaces by running the setup script again and choosing a different server name (e.g., `slack-work`, `slack-personal`).
+| Command | What It Does |
+|---------|--------------|
+| `/clear` | Clear conversation history for this channel/DM |
+| `/status` | Show number of messages in history |
+
+## Configuration
+
+### Environment Variables
+
+Set these in `.env`:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SLACK_BOT_TOKEN` | Yes | Bot token from OAuth & Permissions (xoxb-...) |
+| `SLACK_APP_TOKEN` | Yes | App-level token for Socket Mode (xapp-...) |
 
 ## Danger Zone
 
-This integration can perform actions that affect your team:
+This integration has **full access** to your Groot workspace and can post to Slack:
 
 | Action | Risk Level | Who's Affected |
 |--------|------------|----------------|
-| Send messages | **High** | Team members see it immediately |
-| Read messages, search | Low | No external impact |
+| Send Slack messages | **High** | Channel members see it immediately |
+| Write/overwrite files | **High** | Your local workspace |
+| Read any file | **Medium** | Could expose sensitive data |
+| Fetch URLs | Low | No external impact |
 
-**MARVIN will always confirm before sending messages.**
+Groot will always confirm before performing high-risk actions like sending messages to channels.
 
 ## Troubleshooting
 
-**"Invalid token" errors**
-- Make sure you copied the **User OAuth Token** (starts with `xoxp-`), not the Bot token
-- Check that the app is installed to your workspace
+**Bot not responding to DMs**
+- Ensure `message.im` event is subscribed under Event Subscriptions
+- Check that Socket Mode is enabled and the app is installed to the workspace
 
-**Missing channels**
-- The app can only see channels you have access to
-- For private channels, you must be a member
+**"dispatch_failed" or connection errors**
+- Verify `SLACK_APP_TOKEN` starts with `xapp-` (not `xoxb-`)
+- Ensure the App-Level Token has the `connections:write` scope
 
 **Can't send messages**
-- Ensure the `chat:write` scope is added
-- You can only post to channels you're a member of
+- Confirm the `chat:write` bot scope is added under OAuth & Permissions
+- Reinstall the app to the workspace after adding new scopes
 
-**Permission denied**
-- Some workspaces require admin approval for new apps
-- Check with your Slack admin
+**Python errors on startup**
+- Make sure you're using Python 3.10+
+- Activate the virtual environment: `source venv/bin/activate`
+- Reinstall dependencies: `pip install -r requirements.txt`
 
-## MCP Server
+## Architecture
 
-This integration uses [slack-mcp-server](https://github.com/korotovsky/slack-mcp-server) by korotovsky.
+Runs as a standalone Python process using Socket Mode (no public URL needed). It:
+- Uses `slack-bolt` for the Slack API and Socket Mode connection
+- Calls Claude via the Claude CLI (`claude -p`) — uses your Claude Pro plan, no API key required
+- Stores conversation history in SQLite (`slack.db`)
+- Responds to DMs (`message.im`) and @mentions (`app_mention`)
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `slack_bot.py` | Main bot with Claude CLI integration |
+| `requirements.txt` | Python dependencies |
+| `setup.sh` | Installation script |
+| `run.sh` | Start script (generated by setup.sh) |
+| `../shared/model_client.py` | Shared Claude CLI wrapper (used by Slack and Telegram bots) |
 
 ---
 
-*Contributed by Peter Vanhee*
+*Contributed by Craig Rothwell*

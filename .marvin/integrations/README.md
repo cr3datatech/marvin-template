@@ -52,7 +52,7 @@ Each integration should have its own folder:
 ```
 .marvin/integrations/
 ├── shared/            # Shared utilities used across bots
-│   └── model_client.py  # Anthropic client wrapper (Slack + Telegram)
+│   └── model_client.py  # Claude CLI wrapper (Slack + Telegram)
 └── your-integration/
     ├── README.md      # Documentation (required sections below)
     ├── setup.sh       # Setup script (required patterns below)
