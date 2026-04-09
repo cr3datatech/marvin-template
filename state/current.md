@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-04-05
+Last updated: 2026-04-09
 
 ## Active Priorities
 
@@ -29,26 +29,18 @@ Last updated: 2026-04-05
 - Slack bot system prompt is frozen at startup — state file changes not picked up until restart. `/reload` command not yet implemented.
 - Morning briefing via Telegram/Slack not yet set up
 - claude-mem parked for future consideration — full stack (worker, Chroma, hooks) deemed too heavy for now
-- Google Workspace fully connected — Gmail, Calendar, Drive, Photos available in both bots
-- Atlassian MCP confirmed working in Groot — can use instead of REST API calls from here
+- Persona system live — needs real-world testing across all 6 personas
+- More bot shortcuts to define (`cp` = change persona; others TBD)
 - Bots could use Atlassian MCP via Claude API (not yet implemented)
 
 ## Recent Context
 
-- Tourno error log automation built: Drive folders created, cron running Tue/Thu 9am, email to support@tourno.fi, files renamed after processing (error_log_YYYYMMDDHHmm)
-- Google Workspace MCP auth working for cr3data.tech@gmail.com (Drive + Gmail confirmed)
-- Cron is session-only — standalone script needed for persistence
+- **2026-04-09**: Persona system added to both bots — 6 personas (CGI, CR3Data, Family, Gym, Vacation, Misc). `cp` shortcut live.
+- **2026-04-09**: Fixed bot errors — ANTHROPIC_API_KEY commented out (bots now use Pro plan). allowedTools wildcard fixed. Google Calendar re-authenticated (refresh token — no future expiry).
+- Tourno error log automation built: Drive folders created, cron running Tue/Thu 9am, email to support@tourno.fi, files renamed after processing
 - Full Groot setup completed 2026-03-17
-- Jira REST API connected — all Tourno sprint tools working in Telegram and Slack
-- Confluence tools added to both bots: list spaces, list/read/create/update/delete pages
-- Confluence connected to all three spaces (CDS, CLOUD, tourno)
-- Telegram bot running as systemd service (groot-telegram)
-- Slack bot running as systemd service (groot-slack)
-- Memory backed up in git repo
-- Google Workspace MCP added to Groot (Gmail, Drive, Calendar, Docs, Sheets, Slides)
-- Google Workspace MCP auth completed for cr3data.tech@gmail.com
-- Tourno error log automation active (Tue/Thu cron, Drive → email → rename)
-- User profile created: memory/profile.md (Cr3Data = Tourno, CGI = Cloud Architect)
+- Jira, Confluence, Google Workspace, Slack MCP all connected and working
+- Telegram and Slack bots running as systemd services
 
 ---
 
