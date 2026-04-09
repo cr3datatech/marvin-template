@@ -243,7 +243,7 @@ When researching for a Confluence page:
                     "--model", model,
                     "--output-format", "text",
                     "--no-session-persistence",
-                    "--allowedTools", "mcp__groot-tools__*",
+                    "--allowedTools", "mcp__*",
                 ],
                 capture_output=True,
                 text=True,

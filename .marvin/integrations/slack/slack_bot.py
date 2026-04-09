@@ -288,7 +288,7 @@ After delivering everything, ask: "Which influence play do you want to pair with
                     "--model", model,
                     "--output-format", "text",
                     "--no-session-persistence",
-                    "--allowedTools", "mcp__groot-tools__*",
+                    "--allowedTools", "mcp__*",
                 ],
                 capture_output=True,
                 text=True,

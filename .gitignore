@@ -32,5 +32,8 @@ Thumbs.db
 *.db
 *.sqlite
 
+# Logs
+*.log
+
 # Keep these tracked
 !.gitkeep
