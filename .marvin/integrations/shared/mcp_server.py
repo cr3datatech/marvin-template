@@ -31,6 +31,13 @@ if "GROOT_ROOT" not in os.environ:
     sys.exit("GROOT_ROOT environment variable is required")
 
 GROOT_ROOT = Path(os.environ["GROOT_ROOT"]).resolve()
+
+# Load .env from the Groot root so tools have access to API keys
+try:
+    from dotenv import load_dotenv
+    load_dotenv(GROOT_ROOT / ".env")
+except ImportError:
+    pass
 SERVICE_NAMES = os.environ.get(
     "GROOT_SERVICE_NAMES", "groot-slack,groot-telegram"
 ).split(",")
