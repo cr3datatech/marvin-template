@@ -35,9 +35,17 @@ fi
 if command -v pip3 &> /dev/null; then
     echo -e "${GREEN}✓ pip installed${NC}"
 else
-    echo -e "${RED}✗ pip not found${NC}"
-    echo "  Install pip: python3 -m ensurepip"
-    exit 1
+    echo -e "${YELLOW}! pip not found — installing...${NC}"
+    if command -v apt-get &> /dev/null; then
+        apt-get install -y python3-pip
+    elif command -v apt &> /dev/null; then
+        apt install -y python3-pip
+    else
+        echo -e "${RED}✗ Cannot install pip automatically${NC}"
+        echo "  Run: apt install python3-pip"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ pip installed${NC}"
 fi
 
 # Check for Anthropic API key
