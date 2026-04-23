@@ -80,6 +80,7 @@ Between sessions, `/update` saves progress without ending. `/sync` pulls new fea
 | `/update` | Quick checkpoint (save progress) |
 | `/report` | Generate a weekly summary |
 | `/commit` | Review and commit git changes |
+| `/code` | Open Groot in your IDE |
 | `/status` | Check integration & workspace health |
 | `/sync` | Get updates from the template |
 | `/help` | Show all commands and integrations |
@@ -90,14 +91,16 @@ Groot connects to tools you already use:
 
 | Integration | What It Provides |
 |-------------|------------------|
-| [Google Workspace](.marvin/integrations/google-workspace/) | Gmail, Calendar, Drive |
+| [Google Workspace](.marvin/integrations/google-workspace/) | Gmail, Calendar (full CRUD), Drive, Photos |
 | [Microsoft 365](.marvin/integrations/ms365/) | Outlook, Calendar, OneDrive, Teams |
-| [Atlassian](.marvin/integrations/atlassian/) | Jira, Confluence |
+| [Atlassian](.marvin/integrations/atlassian/) | Jira (tickets, sprints, epics, comments), Confluence (pages, search) |
 | [Slack](.marvin/integrations/slack/) | Channel monitoring, posting |
 | [Linear](.marvin/integrations/linear/) | Issue tracking |
 | [Notion](.marvin/integrations/notion/) | Page reading, database queries |
 | [Telegram](.marvin/integrations/telegram/) | Chat with Groot from your phone |
 | [Parallel Search](.marvin/integrations/parallel-search/) | Web search capabilities |
+| Bitbucket | Repos, branches, PRs, pipelines |
+| GitHub | Repos, create repos |
 
 Each integration includes setup instructions in its directory.
 
@@ -109,7 +112,22 @@ Groot uses a `.claude/` directory structure for extensibility:
 - **Agents** (`.claude/agents/`) - Specialized subagents Groot spawns for delegated work
 - **Skills** (`.claude/skills/`) - Reusable capabilities Claude Code invokes contextually
 
-Templates are included for each type. Just say "create a skill for X" and MARVIN generates the file.
+**Built-in skills:**
+
+| Skill | When It Activates |
+|-------|-------------------|
+| `status` | `/status` command or "is everything connected?" |
+| `daily-briefing` | Session start or "what's on today?" |
+| `content-shipped` | Detects shipping language ("I published...", "just posted...") |
+| `skill-creator` | "Give yourself the ability to..." or "create a skill for..." |
+
+Templates are included for each type. Just say "create a skill for X" and Groot generates the file.
+
+### Personas
+
+Groot supports context-aware personas that adjust tone and focus. Switch with `/persona` in the bots:
+
+- CGI Craig, CR3Data Craig, Family Craig, Gym Craig, Vacation Craig, Misc Craig
 
 ## How It Works
 
