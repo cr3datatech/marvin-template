@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groot Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #06080D;
+    --surface:   #0B0E16;
+    --card:      #0F1420;
+    --border:    #1C2233;
+    --border-hi: #2A3550;
+    --gold:      #C9933A;
+    --gold-dim:  #7A5820;
+    --gold-glow: rgba(201,147,58,0.12);
+    --text:      #EDE9E0;
+    --text-dim:  #7A8099;
+    --text-faint:#3A4055;
+    --green:     #2DD4A4;
+    --green-bg:  #061A14;
+    --green-border: #0A4033;
+    --blue:      #5B9CF6;
+    --blue-bg:   #060F1E;
+    --blue-border:#102040;
+    --teal:      #22D3EE;
+    --teal-bg:   #041415;
+    --teal-border:#094050;
+    --purple:    #A78BFA;
+    --purple-bg: #0A0818;
+    --purple-border:#2D1F5E;
+    --pink:      #F472B6;
+    --pink-bg:   #130A12;
+    --pink-border:#4A1535;
+    --orange:    #FB923C;
+    --orange-bg: #130B04;
+    --orange-border:#4A2808;
+    --yellow:    #FCD34D;
+    --yellow-bg: #120F00;
+    --yellow-border:#4A3A00;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    padding: 60px 24px 80px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(201,147,58,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(91,156,246,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 50% 50%, rgba(34,211,238,0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .arch {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 64px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.1s forwards;
+  }
+
+  .page-header .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+
+  .page-header h1 span { color: var(--gold); }
+
+  .page-header .subtitle {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.3px;
+  }
+
+  .page-header .rule {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* ── LAYER LABELS ── */
+  .layer-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: center;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .layer-label::before,
+  .layer-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-hi));
+  }
+
+  .layer-label::after {
+    background: linear-gradient(90deg, var(--border-hi), transparent);
+  }
+
+  /* ── CONNECTORS ── */
+  .connector {
+    width: 1px;
+    height: 48px;
+    position: relative;
+    background: linear-gradient(to bottom, var(--gold-dim), transparent);
+  }
+
+  .connector::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--gold-dim);
+  }
+
+  /* ── ACCESS CARDS ── */
+  .access-layer {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .access-card {
+    background: var(--card);
+    border: 1px solid var(--border-hi);
+    border-radius: 4px;
+    padding: 20px 32px;
+    text-align: center;
+    min-width: 140px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+
+  .access-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .access-card:hover {
+    border-color: var(--gold-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,147,58,0.1);
+  }
+
+  .access-card:hover::before { opacity: 1; }
+
+  .access-card .icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+  .access-card .name { font-weight: 600; font-size: 0.85rem; color: var(--text); }
+  .access-card .label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-dim); margin-top: 3px; }
+
+  /* ── CORE ── */
+  .core {
+    background: linear-gradient(135deg, #0C0C1A 0%, #0F0C1E 50%, #0C1015 100%);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    padding: 28px 48px 24px;
+    text-align: center;
+    width: 420px;
+    position: relative;
+    box-shadow:
+      0 0 60px var(--gold-glow),
+      0 0 120px rgba(201,147,58,0.05),
+      inset 0 1px 0 rgba(201,147,58,0.15);
+  }
+
+  .core::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, rgba(201,147,58,0.2), transparent 40%, rgba(91,156,246,0.1) 100%);
+    z-index: -1;
+  }
+
+  .core .badge {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 3px 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .core .icon { font-size: 2.2rem; display: block; margin-bottom: 10px; filter: drop-shadow(0 0 12px rgba(201,147,58,0.4)); }
+  .core .name { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--text); }
+  .core .desc { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--gold); margin-top: 6px; opacity: 0.8; }
+  .core .desc2 { font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── SECTION CARDS ── */
+  .section {
+    border-radius: 4px;
+    padding: 20px;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .section:hover { transform: translateY(-2px); }
+
+  .section::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    opacity: 0.5;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .section-icon { font-size: 1.2rem; margin-top: 1px; }
+  .section-title { font-size: 0.88rem; font-weight: 600; line-height: 1.3; }
+  .section-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; opacity: 0.45; margin-top: 2px; }
+
+  /* ── TOOL PILLS ── */
+  .tools { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .tool {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.2px;
+  }
+
+  .tool-group-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--text-faint);
+    margin-bottom: 5px;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .tool-group { margin-bottom: 12px; }
+  .tool-group:last-child { margin-bottom: 0; }
+
+  .group-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.56rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── COLOUR THEMES ── */
+  .theme-gold { background: linear-gradient(135deg, #0C0A04, #100D06); border: 1px solid var(--gold-dim); box-shadow: 0 0 40px var(--gold-glow); }
+  .theme-gold .section-title { color: var(--gold); }
+  .theme-gold::after { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .theme-gold .tool { background: rgba(201,147,58,0.1); color: var(--gold); border: 1px solid rgba(201,147,58,0.25); }
+
+  .theme-green { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .theme-green .section-title { color: var(--green); }
+  .theme-green::after { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+  .theme-green .tool { background: rgba(45,212,164,0.08); color: var(--green); border: 1px solid rgba(45,212,164,0.2); }
+
+  .theme-blue { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+  .theme-blue .section-title { color: var(--blue); }
+  .theme-blue::after { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+  .theme-blue .tool { background: rgba(91,156,246,0.08); color: var(--blue); border: 1px solid rgba(91,156,246,0.2); }
+
+  .theme-teal { background: var(--teal-bg); border: 1px solid var(--teal-border); }
+  .theme-teal .section-title { color: var(--teal); }
+  .theme-teal::after { background: linear-gradient(90deg, transparent, var(--teal), transparent); }
+  .theme-teal .tool { background: rgba(34,211,238,0.07); color: var(--teal); border: 1px solid rgba(34,211,238,0.18); }
+
+  .theme-purple { background: var(--purple-bg); border: 1px solid var(--purple-border); }
+  .theme-purple .section-title { color: var(--purple); }
+  .theme-purple::after { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+  .theme-purple .tool { background: rgba(167,139,250,0.08); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+
+  .theme-pink { background: var(--pink-bg); border: 1px solid var(--pink-border); }
+  .theme-pink .section-title { color: var(--pink); }
+  .theme-pink::after { background: linear-gradient(90deg, transparent, var(--pink), transparent); }
+  .theme-pink .tool { background: rgba(244,114,182,0.08); color: var(--pink); border: 1px solid rgba(244,114,182,0.2); }
+
+  .theme-orange { background: var(--orange-bg); border: 1px solid var(--orange-border); }
+  .theme-orange .section-title { color: var(--orange); }
+  .theme-orange::after { background: linear-gradient(90deg, transparent, var(--orange), transparent); }
+  .theme-orange .tool { background: rgba(251,146,60,0.08); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
+
+  .theme-yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+  .theme-yellow .section-title { color: var(--yellow); }
+  .theme-yellow::after { background: linear-gradient(90deg, transparent, var(--yellow), transparent); }
+  .theme-yellow .tool { background: rgba(252,211,77,0.08); color: var(--yellow); border: 1px solid rgba(252,211,77,0.2); }
+
+  /* ── LAYERS ── */
+  .mcp-layer, .bot-layer, .workspace-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .bot-card {
+    border-radius: 4px;
+    padding: 20px;
+    flex: 1;
+    min-width: 320px;
+    max-width: 580px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+
+  .bot-card:hover { transform: translateY(-2px); }
+
+  .bot-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    opacity: 0.5;
+  }
+
+  /* ── DIVIDERS ── */
+  .divider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 6px 0;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  .divider-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.57rem;
+    color: var(--text-faint);
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── EXTERNAL SERVICES ── */
+  .external-layer {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .ext-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 100px;
+    transition: border-color 0.25s, transform 0.25s;
+    cursor: default;
+  }
+
+  .ext-card:hover { border-color: var(--border-hi); transform: translateY(-1px); }
+  .ext-card .icon { font-size: 1.3rem; display: block; margin-bottom: 5px; }
+  .ext-card .name { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-dim); font-weight: 500; }
+
+  /* ── AUTH NOTE ── */
+  .auth-note {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.61rem;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.7;
+    max-width: 900px;
+  }
+
+  .auth-note .label { color: var(--gold); margin-right: 4px; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    width: 100%;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+  }
+
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── SPACING ── */
+  .gap-sm { height: 20px; display: flex; justify-content: center; }
+  .gap-md { height: 32px; }
+  .gap-xs { height: 12px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim-1 { opacity: 0; animation: fadeUp 0.7s ease 0.2s forwards; }
+  .anim-2 { opacity: 0; animation: fadeUp 0.7s ease 0.35s forwards; }
+  .anim-3 { opacity: 0; animation: fadeUp 0.7s ease 0.5s forwards; }
+  .anim-4 { opacity: 0; animation: fadeUp 0.7s ease 0.65s forwards; }
+  .anim-5 { opacity: 0; animation: fadeUp 0.7s ease 0.8s forwards; }
+  .anim-6 { opacity: 0; animation: fadeUp 0.7s ease 0.95s forwards; }
+  .anim-7 { opacity: 0; animation: fadeUp 0.7s ease 1.1s forwards; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="eyebrow">System Architecture</div>
+  <h1>🌲 <span>Groot</span></h1>
+  <p class="subtitle">AI Chief of Staff &mdash; integrations, tools, and data flows</p>
+  <div class="rule"></div>
+</header>
+
+<div class="arch">
+
+  <!-- ACCESS POINTS -->
+  <div class="layer-label anim-1">Access Points</div>
+  <div class="access-layer anim-1">
+    <div class="access-card">
+      <span class="icon">💻</span>
+      <div class="name">Terminal</div>
+      <div class="label">Claude Code CLI</div>
+    </div>
+    <div class="access-card">
+      <span class="icon">✈️</span>
+      <div class="name">Telegram</div>
+      <div class="label">Mobile / Chat</div>
+    </div>
+    <div class="access-card">
+      <span class="icon">💬</span>
+      <div class="name">Slack</div>
+      <div class="label">Team / Desktop</div>
+    </div>
+  </div>
+
+  <div class="gap-sm anim-2"><div class="connector"></div></div>
+
+  <!-- CORE -->
+  <div class="anim-2">
+    <div class="core">
+      <div class="badge">Core AI</div>
+      <span class="icon">🌲</span>
+      <div class="name">Groot</div>
+      <div class="desc">claude-sonnet-4-6 &middot; 200K context</div>
+      <div class="desc2">Auto-routes: Haiku (lookups) &rarr; Sonnet (reasoning &amp; writing)</div>
+    </div>
+  </div>
+
+  <div class="gap-sm anim-3"><div class="connector"></div></div>
+
+  <!-- MCP SERVERS -->
+  <div class="layer-label anim-3">Claude Code &mdash; MCP Servers</div>
+  <div class="mcp-layer anim-3">
+
+    <div class="section theme-teal" style="min-width:220px; max-width:320px;">
+      <div class="section-header">
+        <span class="section-icon">🔷</span>
+        <div>
+          <div class="section-title">Atlassian MCP</div>
+          <div class="section-subtitle">Remote &middot; mcp.atlassian.com</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">Jira Issues</span>
+        <span class="tool">Jira Projects</span>
+        <span class="tool">Jira Sprints</span>
+        <span class="tool">Confluence Pages</span>
+        <span class="tool">Confluence Spaces</span>
+        <span class="tool">Confluence Search</span>
+      </div>
+    </div>
+
+    <div class="section theme-blue" style="min-width:220px; max-width:320px;">
+      <div class="section-header">
+        <span class="section-icon">🔑</span>
+        <div>
+          <div class="section-title">Google Workspace MCP</div>
+          <div class="section-subtitle">OAuth &middot; uvx workspace-mcp</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">Gmail</span>
+        <span class="tool">Calendar</span>
+        <span class="tool">Drive</span>
+        <span class="tool">Docs</span>
+        <span class="tool">Sheets</span>
+        <span class="tool">Slides</span>
+      </div>
+    </div>
+
+    <div class="section theme-purple" style="min-width:200px; max-width:280px;">
+      <div class="section-header">
+        <span class="section-icon">🔍</span>
+        <div>
+          <div class="section-title">Parallel Search MCP</div>
+          <div class="section-subtitle">Remote &middot; parallel-search</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">web_search_preview</span>
+        <span class="tool">web_fetch</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="gap-md"></div>
+  <div class="divider anim-4">
+    <div class="divider-line"></div>
+    <div class="divider-text">Bot Processes (systemd) &mdash; via groot-tools MCP server</div>
+    <div class="divider-line"></div>
+  </div>
+  <div class="gap-xs"></div>
+
+  <!-- BOT LAYER -->
+  <div class="bot-layer anim-4">
+
+    <!-- TELEGRAM -->
+    <div class="bot-card theme-blue">
+      <div class="section-header">
+        <span class="section-icon">✈️</span>
+        <div>
+          <div class="section-title">Telegram Bot</div>
+          <div class="section-subtitle">Python &middot; groot-telegram.service &middot; SQLite history &middot; Personas</div>
+        </div>
+      </div>
+      <div class="group-header">shared/tools/ &mdash; all auto-loaded</div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">workspace.py</div>
+        <div class="tools">
+          <span class="tool">read_file</span><span class="tool">write_file</span><span class="tool">search_files</span><span class="tool">list_directory</span><span class="tool">append_to_file</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">jira.py</div>
+        <div class="tools">
+          <span class="tool">list_jira_projects</span><span class="tool">search_jira_tickets</span><span class="tool">get_jira_ticket</span><span class="tool">create_jira_ticket</span><span class="tool">list_jira_tickets</span><span class="tool">delete_jira_ticket</span><span class="tool">transition_jira_ticket</span><span class="tool">add_jira_remote_link</span><span class="tool">set_jira_epic</span><span class="tool">remove_jira_from_epic</span><span class="tool">list_jira_epics</span><span class="tool">move_jira_ticket_to_sprint</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">update_jira_ticket.py &middot; jira_comments.py &middot; jira_sprints.py</div>
+        <div class="tools">
+          <span class="tool">update_jira_ticket</span><span class="tool">get_jira_comments</span><span class="tool">add_jira_comment</span><span class="tool">list_jira_boards</span><span class="tool">list_jira_sprints</span><span class="tool">create_jira_sprint</span><span class="tool">update_jira_sprint</span><span class="tool">delete_jira_sprint</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">confluence.py &middot; confluence_search.py &middot; confluence_search_pages.py</div>
+        <div class="tools">
+          <span class="tool">list_confluence_spaces</span><span class="tool">list_confluence_pages</span><span class="tool">read_confluence_page</span><span class="tool">create_confluence_page</span><span class="tool">update_confluence_page</span><span class="tool">delete_confluence_page</span><span class="tool">confluence_search_by_name</span><span class="tool">confluence_search_pages_by_name</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">google_workspace.py &middot; drive_folder_viewer.py</div>
+        <div class="tools">
+          <span class="tool">gmail_list_emails</span><span class="tool">gmail_read_email</span><span class="tool">gmail_send_email</span><span class="tool">calendar_list_events</span><span class="tool">calendar_create_event</span><span class="tool">calendar_update_event</span><span class="tool">calendar_delete_event</span><span class="tool">calendar_get_event</span><span class="tool">drive_search_files</span><span class="tool">drive_read_file</span><span class="tool">list_drive_folder</span><span class="tool">get_drive_folder_structure</span><span class="tool">photos_list_albums</span><span class="tool">photos_search</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">bitbucket.py</div>
+        <div class="tools">
+          <span class="tool">list_bitbucket_repos</span><span class="tool">list_bitbucket_branches</span><span class="tool">list_bitbucket_prs</span><span class="tool">get_bitbucket_pr</span><span class="tool">list_bitbucket_pipelines</span><span class="tool">run_bitbucket_pipeline</span><span class="tool">stop_bitbucket_pipeline</span><span class="tool">list_bitbucket_pipeline_definitions</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">github.py</div>
+        <div class="tools">
+          <span class="tool">list_github_repos</span><span class="tool">create_github_repo</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">fetch_url.py &middot; web_search.py &middot; datetime_tool.py &middot; send_file.py &middot; meta.py</div>
+        <div class="tools">
+          <span class="tool">fetch_url</span><span class="tool">web_search</span><span class="tool">get_current_datetime</span><span class="tool">send_file</span><span class="tool">create_tool</span><span class="tool">list_tools</span><span class="tool">delete_tool</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLACK -->
+    <div class="bot-card theme-green">
+      <div class="section-header">
+        <span class="section-icon">💬</span>
+        <div>
+          <div class="section-title">Slack Bot</div>
+          <div class="section-subtitle">Python &middot; groot-slack.service &middot; SQLite history &middot; Personas</div>
+        </div>
+      </div>
+      <div class="group-header">shared/tools/ &mdash; all auto-loaded</div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">workspace.py</div>
+        <div class="tools">
+          <span class="tool">read_file</span><span class="tool">write_file</span><span class="tool">search_files</span><span class="tool">list_directory</span><span class="tool">append_to_file</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">jira.py</div>
+        <div class="tools">
+          <span class="tool">list_jira_projects</span><span class="tool">search_jira_tickets</span><span class="tool">get_jira_ticket</span><span class="tool">create_jira_ticket</span><span class="tool">list_jira_tickets</span><span class="tool">delete_jira_ticket</span><span class="tool">transition_jira_ticket</span><span class="tool">add_jira_remote_link</span><span class="tool">set_jira_epic</span><span class="tool">remove_jira_from_epic</span><span class="tool">list_jira_epics</span><span class="tool">move_jira_ticket_to_sprint</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">update_jira_ticket.py &middot; jira_comments.py &middot; jira_sprints.py</div>
+        <div class="tools">
+          <span class="tool">update_jira_ticket</span><span class="tool">get_jira_comments</span><span class="tool">add_jira_comment</span><span class="tool">list_jira_boards</span><span class="tool">list_jira_sprints</span><span class="tool">create_jira_sprint</span><span class="tool">update_jira_sprint</span><span class="tool">delete_jira_sprint</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">confluence.py &middot; confluence_search.py &middot; confluence_search_pages.py</div>
+        <div class="tools">
+          <span class="tool">list_confluence_spaces</span><span class="tool">list_confluence_pages</span><span class="tool">read_confluence_page</span><span class="tool">create_confluence_page</span><span class="tool">update_confluence_page</span><span class="tool">delete_confluence_page</span><span class="tool">confluence_search_by_name</span><span class="tool">confluence_search_pages_by_name</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">google_workspace.py &middot; drive_folder_viewer.py</div>
+        <div class="tools">
+          <span class="tool">gmail_list_emails</span><span class="tool">gmail_read_email</span><span class="tool">gmail_send_email</span><span class="tool">calendar_list_events</span><span class="tool">calendar_create_event</span><span class="tool">calendar_update_event</span><span class="tool">calendar_delete_event</span><span class="tool">calendar_get_event</span><span class="tool">drive_search_files</span><span class="tool">drive_read_file</span><span class="tool">list_drive_folder</span><span class="tool">get_drive_folder_structure</span><span class="tool">photos_list_albums</span><span class="tool">photos_search</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">bitbucket.py</div>
+        <div class="tools">
+          <span class="tool">list_bitbucket_repos</span><span class="tool">list_bitbucket_branches</span><span class="tool">list_bitbucket_prs</span><span class="tool">get_bitbucket_pr</span><span class="tool">list_bitbucket_pipelines</span><span class="tool">run_bitbucket_pipeline</span><span class="tool">stop_bitbucket_pipeline</span><span class="tool">list_bitbucket_pipeline_definitions</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">github.py</div>
+        <div class="tools">
+          <span class="tool">list_github_repos</span><span class="tool">create_github_repo</span>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-group-label">fetch_url.py &middot; web_search.py &middot; datetime_tool.py &middot; meta.py</div>
+        <div class="tools">
+          <span class="tool">fetch_url</span><span class="tool">web_search</span><span class="tool">get_current_datetime</span><span class="tool">create_tool</span><span class="tool">list_tools</span><span class="tool">delete_tool</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="gap-md"></div>
+  <div class="divider anim-5">
+    <div class="divider-line"></div>
+    <div class="divider-text">External Services</div>
+    <div class="divider-line"></div>
+  </div>
+  <div class="gap-xs"></div>
+
+  <!-- EXTERNAL SERVICES -->
+  <div class="external-layer anim-5">
+    <div class="ext-card"><span class="icon">🔷</span><div class="name">Jira</div></div>
+    <div class="ext-card"><span class="icon">📄</span><div class="name">Confluence</div></div>
+    <div class="ext-card"><span class="icon">📧</span><div class="name">Gmail</div></div>
+    <div class="ext-card"><span class="icon">📅</span><div class="name">Calendar</div></div>
+    <div class="ext-card"><span class="icon">📁</span><div class="name">Drive</div></div>
+    <div class="ext-card"><span class="icon">🖼️</span><div class="name">Photos</div></div>
+    <div class="ext-card"><span class="icon">🪣</span><div class="name">Bitbucket</div></div>
+    <div class="ext-card"><span class="icon">🐙</span><div class="name">GitHub</div></div>
+    <div class="ext-card"><span class="icon">💬</span><div class="name">Slack API</div></div>
+    <div class="ext-card"><span class="icon">🌐</span><div class="name">Web / URLs</div></div>
+    <div class="ext-card"><span class="icon">🗂️</span><div class="name">Workspace</div></div>
+  </div>
+
+  <div style="height:14px"></div>
+  <div class="auth-note anim-5">
+    <span class="label">Auth:</span>
+    Atlassian → OAuth (MCP) &nbsp;&middot;&nbsp;
+    Google Workspace → OAuth token at <code>~/.config/groot/google_token.json</code> &nbsp;&middot;&nbsp;
+    Jira/Confluence (bots) → API Token &nbsp;&middot;&nbsp;
+    Slack → xoxp user token &nbsp;&middot;&nbsp;
+    Telegram → Bot token &nbsp;&middot;&nbsp;
+    Bitbucket/GitHub → API Token
+  </div>
+
+  <!-- WORKSPACE & MEMORY -->
+  <div style="height:32px"></div>
+  <div class="divider anim-6">
+    <div class="divider-line"></div>
+    <div class="divider-text">Workspace, Memory &amp; Capabilities</div>
+    <div class="divider-line"></div>
+  </div>
+  <div class="gap-xs"></div>
+
+  <div class="workspace-row anim-6">
+
+    <div class="section theme-purple" style="min-width:200px; max-width:240px;">
+      <div class="section-header">
+        <span class="section-icon">🧠</span>
+        <div>
+          <div class="section-title">Auto Memory</div>
+          <div class="section-subtitle">~/.claude/projects/.../memory/</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">user_profile</span><span class="tool">feedback</span><span class="tool">project context</span><span class="tool">references</span>
+      </div>
+    </div>
+
+    <div class="section theme-orange" style="min-width:200px; max-width:240px;">
+      <div class="section-header">
+        <span class="section-icon">📋</span>
+        <div>
+          <div class="section-title">State Files</div>
+          <div class="section-subtitle">state/ &middot; sessions/</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">current.md</span><span class="tool">goals.md</span><span class="tool">session logs</span><span class="tool">CLAUDE.md</span>
+      </div>
+    </div>
+
+    <div class="section theme-pink" style="min-width:220px; max-width:260px;">
+      <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <div>
+          <div class="section-title">Commands</div>
+          <div class="section-subtitle">.claude/commands/</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">/start</span><span class="tool">/end</span><span class="tool">/update</span><span class="tool">/commit</span><span class="tool">/report</span><span class="tool">/status</span><span class="tool">/sync</span><span class="tool">/code</span><span class="tool">/help</span>
+      </div>
+    </div>
+
+    <div class="section theme-teal" style="min-width:200px; max-width:260px;">
+      <div class="section-header">
+        <span class="section-icon">🔧</span>
+        <div>
+          <div class="section-title">Skills</div>
+          <div class="section-subtitle">.claude/skills/ — contextual</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">status</span><span class="tool">daily-briefing</span><span class="tool">content-shipped</span><span class="tool">skill-creator</span>
+      </div>
+    </div>
+
+    <div class="section theme-yellow" style="min-width:200px; max-width:260px;">
+      <div class="section-header">
+        <span class="section-icon">🎭</span>
+        <div>
+          <div class="section-title">Personas</div>
+          <div class="section-subtitle">personas/ — context-aware tone</div>
+        </div>
+      </div>
+      <div class="tools">
+        <span class="tool">CGI Craig</span><span class="tool">CR3Data Craig</span><span class="tool">Family Craig</span><span class="tool">Gym Craig</span><span class="tool">Vacation Craig</span><span class="tool">Misc Craig</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend anim-7">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Core AI (Claude Code)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>MCP Servers (Claude Code only)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Telegram Bot tools</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Slack Bot tools</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--border-hi)"></div>External services</div>
+  </div>
+
+</div>
+</body>
+</html>
