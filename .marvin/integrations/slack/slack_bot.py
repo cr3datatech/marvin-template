@@ -27,7 +27,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import PENDING_PERSONA, build_prompt, format_persona_list, load_personas, select_model
+from model_client import PENDING_PERSONA, build_prompt, daily_briefing, format_persona_list, load_personas, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -386,6 +386,10 @@ def main():
         if user_message.lower() in ["/persona", "/personas", "cp"]:
             groot.store.set_pending_selection(channel_id)
             say(format_persona_list(groot.personas))
+            return
+
+        if user_message.lower() == "daily":
+            say(daily_briefing(GROOT_ROOT))
             return
 
         if user_message.lower() == "/status":

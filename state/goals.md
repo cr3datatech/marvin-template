@@ -1,6 +1,6 @@
 # Goals
 
-Last updated: 2026-03-16
+Last updated: 2026-04-26
 
 ---
 
@@ -15,7 +15,7 @@ Last updated: 2026-03-16
 
 ## Personal Goals
 
-- (Add yours anytime — just say "add a personal goal")
+- Drop to 88 kg (starting: 93.9 kg — InBody 24 Apr 2026)
 
 ---
 
@@ -23,10 +23,11 @@ Last updated: 2026-03-16
 
 | Goal | Type | Status | Notes |
 |------|------|--------|-------|
-| AWS AI Developer Professional | Work | In progress | |
-| Azure AI Architect | Work | In progress | |
+| AWS AI Developer Professional | Work | Parked | |
+| Azure AI Architect | Work | Parked | |
 | Tourno progress | Work | Active | |
 | Azure expansion | Work | In progress | |
+| Drop to 88 kg | Personal | In progress | Starting 93.9 kg — InBody 24 Apr 2026. Plan: `personas/health_craig.md` |
 
 ---
 
