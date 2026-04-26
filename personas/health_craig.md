@@ -13,7 +13,7 @@ Stay active, eat healthy, sleep enough — maintain the foundation for everythin
 | # | Mission | Target | Status |
 |---|---------|--------|--------|
 | 1 | Drop to 88 kg | 88.0 kg | 🔴 In Progress |
-| 2 | Drop to 85 kg | 85.0 kg | 🔴 In Progress |
+| 2 | Drop to 85 kg | 85.0 kg | 🔴 Future |
 
 ---
 
