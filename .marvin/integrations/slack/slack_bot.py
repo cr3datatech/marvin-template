@@ -377,13 +377,13 @@ def main():
 
         channel_id = event["channel"]
 
-        if user_message.lower() == "/clear":
+        if user_message.lower() in ["clear", "/clear"]:
             groot.store.clear_history(channel_id)
             groot.store.clear_persona(channel_id)
             say("Conversation history and persona cleared.")
             return
 
-        if user_message.lower() in ["/persona", "/personas", "cp"]:
+        if user_message.lower() in ["persona", "personas", "cp"]:
             groot.store.set_pending_selection(channel_id)
             say(format_persona_list(groot.personas))
             return
@@ -392,7 +392,7 @@ def main():
             say(daily_briefing(GROOT_ROOT))
             return
 
-        if user_message.lower() == "/status":
+        if user_message.lower() in ["status", "/status"]:
             history = groot.store.get_history(channel_id)
             persona = groot.store.get_persona(channel_id)
             persona_str = persona["name"] if persona else "None"
