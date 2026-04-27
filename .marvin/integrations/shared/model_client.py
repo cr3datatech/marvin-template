@@ -27,7 +27,7 @@ def select_model(message: str) -> str:
 
 def resolve_shortcut(message: str, groot_root: Path) -> str | None:
     """If message is 'word/', look it up in memory/shortcuts.md and return a pre-built prompt."""
-    match = re.match(r'^([a-zA-Z][a-zA-Z0-9_-]*)/$', message.strip())
+    match = re.match(r'^([a-zA-Z][a-zA-Z0-9_ -]*?)/$', message.strip())
     if not match:
         return None
     keyword = match.group(1).lower()

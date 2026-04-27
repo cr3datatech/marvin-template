@@ -6,17 +6,15 @@ type: memory
 
 # Shortcuts
 
-## Tourno Pipelines
+Shortcuts are trigger words or phrases. Append `/` to trigger via the bots (e.g. `daily/`).
 
-Repo: `tourno` | Branch: `master` (only branch)
+---
 
-| Shortcut | Pipeline Name |
-|----------|--------------|
-| `run tourno pipeline test` | `manual-deploy-test` |
-| `run tourno pipeline prod` | `manual-deploy-production` |
-| `run tourno pipeline both` | `manual-deploy-both` |
+## Meta
 
-**Usage:** When Craig uses any of these shortcuts, immediately run the corresponding pipeline on `master` — no need to ask for confirmation.
+| Shortcut | Action |
+|----------|--------|
+| `shortcuts` | Read `memory/shortcuts.md` and present all available shortcuts in a clean list with their descriptions. |
 
 ---
 
@@ -32,4 +30,26 @@ Repo: `tourno` | Branch: `master` (only branch)
 
 | Shortcut | Action |
 |----------|--------|
-| `health` | Read `memory/health.md`, get today's date/day, identify if it's a HYROX day, training day, or rest day, and print today's eating plan summary |
+| `health` | Read `memory/health.md`, get today's date/day, identify if it's a HYROX day, training day, or rest day, and print today's eating plan summary. |
+
+---
+
+## Cr3Data
+
+| Shortcut | Action |
+|----------|--------|
+| `cr3data` | Pull a live snapshot of all Cr3Data-related work: Tourno Jira (TF) active tickets by status (To Do + In Progress), recent Confluence pages in the tourno space, upcoming calendar events, and open threads from state files related to Cr3Data. |
+
+---
+
+## Tourno Pipelines
+
+Repo: `tourno` | Branch: `master` (only branch)
+
+| Shortcut | Pipeline Name |
+|----------|--------------|
+| `run tourno pipeline test` | `manual-deploy-test` |
+| `run tourno pipeline prod` | `manual-deploy-production` |
+| `run tourno pipeline both` | `manual-deploy-both` |
+
+**Usage:** When Craig uses any of these shortcuts, immediately run the corresponding pipeline on `master` — no need to ask for confirmation.
