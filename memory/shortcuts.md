@@ -24,7 +24,7 @@ Repo: `tourno` | Branch: `master` (only branch)
 
 | Shortcut | Action |
 |----------|--------|
-| `daily` | Pull open items across all areas (Cr3Data, Cloud/CGI, Certs) + today's calendar and present as unified briefing |
+| `daily` | Read `state/current.md` and `memory/health.md`. Get today's date and day. Present this week's focus (from current.md, up to the first ---), then today's meal plan from health.md based on the day type. Keep it concise. |
 
 ---
 
