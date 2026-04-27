@@ -299,8 +299,15 @@ After delivering everything, ask: "Which influence play do you want to pair with
     def run_shortcut(self, prompt: str) -> str:
         try:
             result = subprocess.run(
-                ["claude", "-p", prompt, "--model", HAIKU, "--output-format", "text", "--no-session-persistence"],
-                capture_output=True, text=True, timeout=60, cwd=str(GROOT_ROOT),
+                [
+                    "claude", "-p", prompt,
+                    "--system-prompt", self.system_prompt,
+                    "--model", HAIKU,
+                    "--output-format", "text",
+                    "--no-session-persistence",
+                    "--allowedTools", "mcp__groot-tools__*,mcp__atlassian__*,mcp__google-workspace__*,mcp__claude_ai_Google_Calendar__*",
+                ],
+                capture_output=True, text=True, timeout=90, cwd=str(GROOT_ROOT),
             )
             return result.stdout.strip() or "Done." if result.returncode == 0 else "Shortcut failed."
         except subprocess.TimeoutExpired:
