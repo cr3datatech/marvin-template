@@ -1,69 +1,72 @@
----
-name: health_craig
-description: Craig's nutrition, fitness, and weight loss plan
-type: memory
----
+# 🏃 Health Craig
 
-# Health Craig
+## Mission
 
-## Current Stats
-- **Start weight:** 93.9 kg (InBody, 24 Apr 2026)
-- **Target 1:** 88 kg
-- **Target 2:** 85 kg
-- **Started:** Thursday 24 Apr 2026
+Stay active, eat healthy, sleep enough — maintain the foundation for everything else.
 
 ---
 
-## Weekly Training Schedule
+## Active Missions
 
-| Day | Type |
-|-----|------|
-| Monday | 🏋️ HYROX (Evening) |
-| Tuesday | Rest / Active recovery |
-| Wednesday | ❓ (update if training) |
-| Thursday | ❓ (update if training) |
-| Friday | ❓ (update if training) |
-| Saturday | ❓ (update if training) |
-| Sunday | Rest |
+> Based on InBody results — 24 Apr 2026 (starting weight: 93.9 kg)
 
-> ⚠️ Update the schedule above with actual training days as you confirm them.
+| # | Mission | Target | Status |
+|---|---------|--------|--------|
+| 1 | Drop to 88 kg | 88.0 kg | 🔴 In Progress |
+| 2 | Drop to 85 kg | 85.0 kg | 🔴 Future |
 
 ---
 
-## Meal Plan by Day Type
+## Mission 1 — Nutrition Strategy (93.9 kg → 88 kg)
 
-### 🏋️ HYROX Day (Monday)
-- **Breakfast:** Greek yogurt/skyr + oats/granola + berries
-- **Lunch:** Chicken/turkey/beef + rice/potatoes + veggies + olive oil
-- **Pre-HYROX (60–90 min before):** Banana + protein shake
-- **Dinner (biggest meal):** Lean protein + rice/potatoes/pasta + vegetables
-- **Late snack (optional):** Cottage cheese/skyr/protein shake
+### Rules
+1. Protein at every meal — non-negotiable
+2. Carbs follow effort — high on HYROX days, lower on rest days
+3. Repeat meals = consistency = results
+4. If hungry: add more vegetables or protein, not random snacks
 
-### 🏃 Training Day (other sessions)
-- **Breakfast:** Greek yogurt/skyr + oats/granola + berries
-- **Lunch:** Lean protein + rice/potatoes + veggies
-- **Pre-session (60 min before):** Banana + protein shake
-- **Dinner:** Lean protein + moderate carbs + vegetables
+### Weekly Template
 
-### 😴 Rest Day
-- **Breakfast:** Eggs (2–3) + veggies + optional slice of bread
-- **Lunch:** Lean protein + salad or roasted veg (lower carbs)
-- **Dinner:** Lean protein + veggies (skip the big carb portion)
-- **Snack (if needed):** Greek yogurt or cottage cheese
+**Monday / Wednesday (Evening HYROX)**
+- Breakfast: Greek yogurt or skyr, oats or granola, berries
+- Lunch: Chicken/turkey/beef, rice or potatoes, vegetables, olive oil
+- Pre-HYROX (60–90 min before): Banana + protein shake
+- Dinner (biggest meal): Lean protein, rice/potatoes/pasta, vegetables
+- Late snack (optional): Cottage cheese / skyr / protein shake
+
+**Saturday (Morning HYROX)**
+- Pre-workout: Banana or toast + honey, optional protein shake
+- Post-workout (big meal): Eggs + toast + fruit, or chicken + rice
+- Lunch: Salmon + potatoes + veggies (protein + carbs + fats)
+- Dinner: Protein-focused, moderate carbs (e.g. steak + salad + potatoes)
+
+**Tuesday / Thursday (Weights or Light Days)**
+- Breakfast: Eggs + toast, or yogurt + nuts
+- Lunch: Protein + moderate carbs (chicken wrap or rice bowl)
+- Dinner: Protein + vegetables + fats, lower carbs than HYROX days
+- Snack: Protein-based (shake, yogurt)
+
+**Friday / Sunday (Lower Activity / Golf)**
+- Breakfast: Eggs + avocado, or yogurt + nuts
+- Lunch: Protein + vegetables + fats, minimal carbs
+- Dinner: Protein + vegetables + some fats
+- Optional treat: Keep it small and controlled
+
+### Expected Progress
+- Within 2–3 weeks: weight trending down, waist shrinking, performance stable
 
 ---
 
-## Non-Negotiable Rules
-1. Protein at every meal
-2. Carbs follow effort — more on training days, less on rest days
-3. Repeat meals for consistency (don't overthink it)
-4. If hungry: add veggies or protein, NOT random snacks
-5. Stay hydrated
+## Core Principles
+
+* Consistency beats perfection
+* Small daily habits compound
+* Recovery is as important as effort
+* Energy management > motivation
+* Respect your body's signals
 
 ---
 
-## Progress Log
-| Date | Weight | Notes |
-|------|--------|-------|
-| 24 Apr 2026 | 93.9 kg | InBody baseline |
+## Identity Anchor
 
+"I stay healthy because it makes everything else possible."

@@ -24,7 +24,7 @@ Repo: `tourno` | Branch: `master` (only branch)
 
 | Shortcut | Action |
 |----------|--------|
-| `daily` | Pull open items from all personas (Cr3Data, Cloud/CGI, Certs, Health) + today's calendar and present as unified briefing |
+| `daily` | Pull open items from all personas (Cr3Data, Cloud/CGI, Certs) + today's calendar and present as unified briefing |
 
 ---
 
