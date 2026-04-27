@@ -42,6 +42,14 @@ Shortcuts are trigger words or phrases. Append `/` to trigger via the bots (e.g.
 
 ---
 
+## Tourno
+
+| Shortcut | Action |
+|----------|--------|
+| `tourno` | Find the active Jira sprint in the TF project using `list_jira_sprints`. Then fetch all tickets in that sprint using `list_jira_tickets` or `search_jira_tickets`. Group and display them by status: To Do, In Progress, In Review, Done/Closed. Show ticket key, summary, and assignee for each. |
+
+---
+
 ## Tourno Pipelines
 
 Repo: `tourno` | Branch: `master` (only branch)
