@@ -34,7 +34,7 @@ from telegram.ext import (
 )
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import HAIKU, build_prompt, daily_briefing, resolve_shortcut, select_model
+from model_client import HAIKU, build_prompt, resolve_shortcut, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -293,7 +293,7 @@ When researching for a Confluence page:
             return
         await update.message.reply_text(
             "**Groot Commands:**\n\n"
-            "/daily - Daily briefing (focus, meals, health plan)\n"
+            "\"daily/\" - Daily briefing (focus + today's meals)\n"
             "/save [topic] - Save conversation summary to session log\n"
             "/clear - Clear conversation history\n"
             "/status - Check bot status\n\n"
@@ -311,12 +311,6 @@ When researching for a Confluence page:
             return
         self.store.clear_history(update.effective_chat.id)
         await update.message.reply_text("Conversation history cleared.")
-
-    async def daily_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if not self._is_authorized(update.effective_user.id):
-            await update.message.reply_text("Unauthorized.")
-            return
-        await update.message.reply_text(daily_briefing(MARVIN_ROOT), parse_mode="Markdown")
 
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not self._is_authorized(update.effective_user.id):
@@ -476,7 +470,6 @@ When researching for a Confluence page:
         app.add_handler(CommandHandler("start", self.start_command))
         app.add_handler(CommandHandler("help", self.help_command))
         app.add_handler(CommandHandler("clear", self.clear_command))
-        app.add_handler(CommandHandler("daily", self.daily_command))
         app.add_handler(CommandHandler("status", self.status_command))
         app.add_handler(CommandHandler("save", self.save_command))
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))

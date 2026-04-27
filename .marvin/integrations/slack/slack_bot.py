@@ -27,7 +27,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import HAIKU, build_prompt, daily_briefing, resolve_shortcut, select_model
+from model_client import HAIKU, build_prompt, resolve_shortcut, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -346,10 +346,6 @@ def main():
         if user_message.lower() in ["clear", "/clear"]:
             groot.store.clear_history(channel_id)
             say("Conversation history cleared.")
-            return
-
-        if user_message.lower() == "daily":
-            say(daily_briefing(GROOT_ROOT))
             return
 
         shortcut_prompt = resolve_shortcut(user_message, GROOT_ROOT)
