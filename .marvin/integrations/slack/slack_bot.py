@@ -27,7 +27,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import PENDING_PERSONA, build_prompt, daily_briefing, format_persona_list, load_personas, select_model
+from model_client import build_prompt, daily_briefing, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -63,13 +63,6 @@ class ConversationStore:
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_messages_channel_id
             ON messages(channel_id, timestamp DESC)
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS personas (
-                channel_id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                content TEXT NOT NULL
-            )
         """)
         conn.commit()
         conn.close()
@@ -107,43 +100,12 @@ class ConversationStore:
         conn.commit()
         conn.close()
 
-    def get_persona(self, channel_id: str) -> dict | None:
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT name, content FROM personas WHERE channel_id = ?", (channel_id,))
-        row = cursor.fetchone()
-        conn.close()
-        return {"name": row[0], "content": row[1]} if row else None
-
-    def set_persona(self, channel_id: str, name: str, content: str):
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT OR REPLACE INTO personas (channel_id, name, content) VALUES (?, ?, ?)",
-            (channel_id, name, content),
-        )
-        conn.commit()
-        conn.close()
-
-    def clear_persona(self, channel_id: str):
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM personas WHERE channel_id = ?", (channel_id,))
-        conn.commit()
-        conn.close()
-
-    def set_pending_selection(self, channel_id: str):
-        """Show persona list next — don't clear active persona until they pick."""
-        self.set_persona(channel_id, PENDING_PERSONA, "")
-
-
 class GrootSlackBot:
     """Groot Slack Bot — uses Claude CLI with groot-tools MCP server."""
 
     def __init__(self):
         self.store = ConversationStore(DB_PATH)
         self.system_prompt = self._build_system_prompt()
-        self.personas = load_personas(GROOT_ROOT)
         logger.info("Groot Slack bot initialized")
 
     def _build_system_prompt(self) -> str:
@@ -318,14 +280,6 @@ After delivering everything, ask: "Which influence play do you want to pair with
         logger.info(f"Using model: {model}")
 
         system = self.system_prompt
-        persona = self.store.get_persona(channel_id)
-        if persona:
-            system += (
-                f"\n\n## Active Persona\n"
-                f"Craig is currently in **{persona['name']}** mode. "
-                f"Adapt your tone, focus, and priorities to match this persona:\n\n"
-                f"{persona['content']}"
-            )
 
         try:
             result = subprocess.run(
@@ -379,13 +333,7 @@ def main():
 
         if user_message.lower() in ["clear", "/clear"]:
             groot.store.clear_history(channel_id)
-            groot.store.clear_persona(channel_id)
-            say("Conversation history and persona cleared.")
-            return
-
-        if user_message.lower() in ["persona", "personas", "cp"]:
-            groot.store.set_pending_selection(channel_id)
-            say(format_persona_list(groot.personas))
+            say("Conversation history cleared.")
             return
 
         if user_message.lower() == "daily":
@@ -394,23 +342,7 @@ def main():
 
         if user_message.lower() in ["status", "/status"]:
             history = groot.store.get_history(channel_id)
-            persona = groot.store.get_persona(channel_id)
-            persona_str = persona["name"] if persona else "None"
-            say(f"*Groot Status*\n• Messages in history: {len(history)}\n• Active persona: {persona_str}")
-            return
-
-        # Persona gate — ask if not set or pending selection
-        persona = groot.store.get_persona(channel_id)
-        awaiting = persona is None or persona["name"] == PENDING_PERSONA
-        if awaiting:
-            valid = [str(i) for i in range(1, len(groot.personas) + 1)]
-            if user_message.strip() in valid:
-                idx = int(user_message.strip()) - 1
-                name, content = groot.personas[idx]
-                groot.store.set_persona(channel_id, name, content)
-                say(f"Got it — *{name}* mode. What's on your mind?")
-            else:
-                say(format_persona_list(groot.personas))
+            say(f"*Groot Status*\n• Messages in history: {len(history)}")
             return
 
         groot.store.add_message(channel_id, "user", user_message)

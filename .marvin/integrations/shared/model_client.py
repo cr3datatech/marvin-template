@@ -7,37 +7,6 @@ from pathlib import Path
 SONNET = "claude-sonnet-4-6"
 HAIKU = "claude-haiku-4-5-20251001"
 
-PERSONA_FILES = [
-    ("CGI Craig", "cgi_craig.md"),
-    ("CR3Data Craig", "cr3data_craig.md"),
-    ("Family Craig", "family_craig.md"),
-    ("Health Craig", "health_craig.md"),
-    ("Vacation Craig", "vacation_craig.md"),
-    ("Misc Craig", "misc_craig.md"),
-]
-
-
-def load_personas(groot_root: Path) -> list[tuple[str, str]]:
-    """Load persona files. Returns list of (name, content) tuples."""
-    personas = []
-    personas_dir = groot_root / "personas"
-    for name, filename in PERSONA_FILES:
-        path = personas_dir / filename
-        content = path.read_text() if path.exists() else f"Persona: {name}"
-        personas.append((name, content))
-    return personas
-
-
-PENDING_PERSONA = "__pending__"
-
-
-def format_persona_list(personas: list[tuple[str, str]]) -> str:
-    """Return the numbered persona selection message."""
-    lines = ["Which persona are you in right now?\n"]
-    for i, (name, _) in enumerate(personas, 1):
-        lines.append(f"{i}. {name}")
-    return "\n".join(lines)
-
 _DAY_TYPES = {
     0: ("Monday", "Evening HYROX"),
     1: ("Tuesday", "Weights / Light"),
@@ -85,7 +54,7 @@ def daily_briefing(groot_root: Path) -> str:
     day_name, day_type = _DAY_TYPES[today.weekday()]
 
     # Health meal plan
-    health_path = groot_root / "personas" / "health_craig.md"
+    health_path = groot_root / "memory" / "health_craig.md"
     health_content = health_path.read_text() if health_path.exists() else ""
     meals = _extract_day_meals(health_content, day_type) if health_content else "(health plan unavailable)"
 

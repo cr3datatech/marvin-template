@@ -34,7 +34,7 @@ from telegram.ext import (
 )
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import PENDING_PERSONA, build_prompt, daily_briefing, format_persona_list, load_personas, select_model
+from model_client import build_prompt, daily_briefing, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -70,13 +70,6 @@ class ConversationStore:
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_messages_chat_id
             ON messages(chat_id, timestamp DESC)
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS personas (
-                chat_id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                content TEXT NOT NULL
-            )
         """)
         conn.commit()
         conn.close()
@@ -114,36 +107,6 @@ class ConversationStore:
         conn.commit()
         conn.close()
 
-    def get_persona(self, chat_id: int) -> dict | None:
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT name, content FROM personas WHERE chat_id = ?", (str(chat_id),))
-        row = cursor.fetchone()
-        conn.close()
-        return {"name": row[0], "content": row[1]} if row else None
-
-    def set_persona(self, chat_id: int, name: str, content: str):
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT OR REPLACE INTO personas (chat_id, name, content) VALUES (?, ?, ?)",
-            (str(chat_id), name, content),
-        )
-        conn.commit()
-        conn.close()
-
-    def clear_persona(self, chat_id: int):
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM personas WHERE chat_id = ?", (str(chat_id),))
-        conn.commit()
-        conn.close()
-
-    def set_pending_selection(self, chat_id: int):
-        """Show persona list next — don't clear active persona until they pick."""
-        self.set_persona(chat_id, PENDING_PERSONA, "")
-
-
 class MARVINBot:
     """Groot Telegram Bot — uses Claude CLI with groot-tools MCP server."""
 
@@ -158,7 +121,6 @@ class MARVINBot:
         self.allowed_user_ids = allowed_user_ids
         self.store = ConversationStore(DB_PATH)
         self.system_prompt = self._build_system_prompt()
-        self.personas = load_personas(MARVIN_ROOT)
 
     def _build_system_prompt(self) -> str:
         today = datetime.now().strftime("%Y-%m-%d")
@@ -303,14 +265,6 @@ When researching for a Confluence page:
         logger.info(f"Using model: {model}")
 
         system = self.system_prompt
-        persona = self.store.get_persona(chat_id)
-        if persona:
-            system += (
-                f"\n\n## Active Persona\n"
-                f"Craig is currently in **{persona['name']}** mode. "
-                f"Adapt your tone, focus, and priorities to match this persona:\n\n"
-                f"{persona['content']}"
-            )
 
         if update:
             try:
@@ -347,7 +301,7 @@ When researching for a Confluence page:
             "• \"What's in my current state?\"\n"
             "• \"Save this to content/ideas.md\"\n"
             "• \"Search for meeting notes\"\n"
-            "• Share any link for analysis\n",
+            "• Share any link for analysis",
             parse_mode="Markdown",
         )
 
@@ -356,15 +310,7 @@ When researching for a Confluence page:
             await update.message.reply_text("Unauthorized.")
             return
         self.store.clear_history(update.effective_chat.id)
-        self.store.clear_persona(update.effective_chat.id)
-        await update.message.reply_text("Conversation history and persona cleared.")
-
-    async def persona_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if not self._is_authorized(update.effective_user.id):
-            await update.message.reply_text("Unauthorized.")
-            return
-        self.store.set_pending_selection(update.effective_chat.id)
-        await update.message.reply_text(format_persona_list(self.personas))
+        await update.message.reply_text("Conversation history cleared.")
 
     async def daily_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not self._is_authorized(update.effective_user.id):
@@ -377,12 +323,9 @@ When researching for a Confluence page:
             await update.message.reply_text("Unauthorized.")
             return
         history = self.store.get_history(update.effective_chat.id)
-        persona = self.store.get_persona(update.effective_chat.id)
-        persona_str = persona["name"] if persona else "None"
         await update.message.reply_text(
             f"**Groot Status:**\n\n"
             f"• Messages in history: {len(history)}\n"
-            f"• Active persona: {persona_str}\n"
             f"• Authorized users: {len(self.allowed_user_ids)}",
             parse_mode="Markdown",
         )
@@ -444,20 +387,6 @@ When researching for a Confluence page:
 
         chat_id = update.effective_chat.id
         user_message = update.message.text
-
-        # Persona gate — ask if not set or pending selection
-        persona = self.store.get_persona(chat_id)
-        awaiting = persona is None or persona["name"] == PENDING_PERSONA
-        if awaiting:
-            valid = [str(i) for i in range(1, len(self.personas) + 1)]
-            if user_message.strip() in valid:
-                idx = int(user_message.strip()) - 1
-                name, content = self.personas[idx]
-                self.store.set_persona(chat_id, name, content)
-                await update.message.reply_text(f"Got it — *{name}* mode. What's on your mind?", parse_mode="Markdown")
-            else:
-                await update.message.reply_text(format_persona_list(self.personas))
-            return
 
         self.store.add_message(chat_id, "user", user_message)
         await update.message.chat.send_action("typing")
@@ -540,7 +469,6 @@ When researching for a Confluence page:
         app.add_handler(CommandHandler("start", self.start_command))
         app.add_handler(CommandHandler("help", self.help_command))
         app.add_handler(CommandHandler("clear", self.clear_command))
-        app.add_handler(CommandHandler(["persona", "personas", "cp"], self.persona_command))
         app.add_handler(CommandHandler("daily", self.daily_command))
         app.add_handler(CommandHandler("status", self.status_command))
         app.add_handler(CommandHandler("save", self.save_command))

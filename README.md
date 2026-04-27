@@ -123,12 +123,6 @@ Groot uses a `.claude/` directory structure for extensibility:
 
 Templates are included for each type. Just say "create a skill for X" and Groot generates the file.
 
-### Personas
-
-Groot supports context-aware personas that adjust tone and focus. Switch with `/persona` in the bots:
-
-- CGI Craig, CR3Data Craig, Family Craig, Gym Craig, Vacation Craig, Misc Craig
-
 ## How It Works
 
 Groot separates your workspace from the template:

@@ -29,7 +29,7 @@ Last updated: 2026-04-27
 | AWS CloudOps Engineer - Associate | Work | Active | |
 | Tourno progress | Work | Active | |
 | Azure expansion | Work | In progress | |
-| Drop to 88 kg | Personal | In progress | Starting 93.9 kg — InBody 24 Apr 2026. Plan: `personas/health_craig.md` |
+| Drop to 88 kg | Personal | In progress | Starting 93.9 kg — InBody 24 Apr 2026 |
 
 ---
 

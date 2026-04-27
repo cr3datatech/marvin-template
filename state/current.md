@@ -57,8 +57,6 @@ Last updated: 2026-04-26
 - Slack bot system prompt is frozen at startup — state file changes not picked up until restart. `/reload` command not yet implemented.
 - Morning briefing via Telegram/Slack not yet set up
 - claude-mem parked for future consideration — full stack (worker, Chroma, hooks) deemed too heavy for now
-- Persona system live — needs real-world testing across all 6 personas
-- More bot shortcuts to define (`cp` = change persona; others TBD)
 - Bots could use Atlassian MCP via Claude API (not yet implemented)
 
 ## Recent Context
@@ -66,7 +64,6 @@ Last updated: 2026-04-26
 - **2026-04-26**: Added LinkedIn post task (SW Dev Bottleneck) to Cr3Data Craig week
 - **2026-04-26**: Added exec presence schema reevaluation to Cr3Data Craig week
 - **2026-04-26**: Week scoped — Alpaca API build, TF-427/429 In Progress, CrowdStrike/Kubernetes deliverables
-- **2026-04-09**: Persona system added to both bots — 6 personas (CGI, CR3Data, Family, Gym, Vacation, Misc). `cp` shortcut live.
 - **2026-04-09**: Fixed bot errors — ANTHROPIC_API_KEY commented out (bots now use Pro plan). allowedTools wildcard fixed. Google Calendar re-authenticated (refresh token — no future expiry).
 - Tourno error log automation built: Drive folders created, cron running Tue/Thu 9am, email to support@tourno.fi, files renamed after processing
 - Full Groot setup completed 2026-03-17
