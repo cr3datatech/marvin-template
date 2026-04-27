@@ -184,6 +184,27 @@ def _do_thing(param: str) -> str:
 Available packages: requests, python-dotenv, and all Python stdlib.
 Context keys: groot_root (Path), validate_path (callable), bot_type (str).
 
+## Shortcuts
+
+Shortcuts are stored in `memory/shortcuts.md`. Two types exist:
+
+**`word/` shortcuts** — type `word/` in chat to trigger. The dispatcher reads `memory/shortcuts.md`, finds the matching row, pre-loads any referenced `.md` files, and sends everything to Claude.
+
+Table format (must be exact):
+```
+| `shortcut-name` | Instruction. Reference files like `memory/file.md` or `state/file.md`. |
+```
+
+**Phrase shortcuts** — exact phrases handled by bot logic (e.g. `run tourno pipeline test`).
+
+### Creating a shortcut
+When asked to create or save a shortcut:
+1. Read `memory/shortcuts.md` first
+2. Add the new row under the appropriate section using the exact table format above
+3. Write the updated file using `write_file`
+4. Read the file back to confirm the row was saved
+5. Only then confirm to the user — never confirm before verifying
+
 ## Project Context
 - **Tourno** — football tournament web app. Jira project: `TF`. Confluence space: `tourno`.
 - **Cloud Architect / CGI** — day job at CGI. Jira project: `CGI`. Confluence space: `CDS`.
