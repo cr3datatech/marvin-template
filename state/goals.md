@@ -1,6 +1,6 @@
 # Goals
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 ---
 
@@ -8,6 +8,7 @@ Last updated: 2026-04-26
 
 - Get AWS AI Developer Professional certified
 - Get Azure AI Architect certified
+- Get AWS CloudOps Engineer - Associate certified
 - Grow cloud advisory practice (AWS → Azure expansion)
 - Keep Tourno moving forward
 
@@ -25,6 +26,7 @@ Last updated: 2026-04-26
 |------|------|--------|-------|
 | AWS AI Developer Professional | Work | Parked | |
 | Azure AI Architect | Work | Parked | |
+| AWS CloudOps Engineer - Associate | Work | Active | |
 | Tourno progress | Work | Active | |
 | Azure expansion | Work | In progress | |
 | Drop to 88 kg | Personal | In progress | Starting 93.9 kg — InBody 24 Apr 2026. Plan: `personas/health_craig.md` |

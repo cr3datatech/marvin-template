@@ -14,5 +14,6 @@ type: user
 **Goals:**
 - AWS AI Developer Professional certification
 - Azure AI Architect certification
+- AWS CloudOps Engineer - Associate certification
 
 **Communication Style:** Casual, direct, to the point — no fluff
