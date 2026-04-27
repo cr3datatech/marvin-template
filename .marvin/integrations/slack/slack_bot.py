@@ -185,11 +185,13 @@ Table format (must be exact):
 
 ### Creating a shortcut
 When asked to create or save a shortcut:
-1. Read `memory/shortcuts.md` first
-2. Add the new row under the appropriate section using the exact table format above
-3. Write the updated file using `write_file`
-4. Read the file back to confirm the row was saved
+1. Read `memory/shortcuts.md` first using `read_file`
+2. Add ONLY a new row to the existing table — never rewrite or reformat the file
+3. Use `append_to_file` to add the row, OR write the full file back with only the new row added and everything else identical
+4. Read the file back to confirm the row is present
 5. Only then confirm to the user — never confirm before verifying
+
+**NEVER rewrite, reformat, or restructure `memory/shortcuts.md`. Only add rows.**
 
 ## Project Context
 - **Tourno** — football tournament web app. Jira project: `TF`. Confluence space: `tourno`.
