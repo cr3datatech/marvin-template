@@ -32,4 +32,4 @@ Repo: `tourno` | Branch: `master` (only branch)
 
 | Shortcut | Action |
 |----------|--------|
-| `health` | Read `memory/health_craig.md`, get today's date/day, identify if it's a HYROX day, training day, or rest day, and print today's eating plan summary |
+| `health` | Read `memory/health.md`, get today's date/day, identify if it's a HYROX day, training day, or rest day, and print today's eating plan summary |

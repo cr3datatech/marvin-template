@@ -54,7 +54,7 @@ def daily_briefing(groot_root: Path) -> str:
     day_name, day_type = _DAY_TYPES[today.weekday()]
 
     # Health meal plan
-    health_path = groot_root / "memory" / "health_craig.md"
+    health_path = groot_root / "memory" / "health.md"
     health_content = health_path.read_text() if health_path.exists() else ""
     meals = _extract_day_meals(health_content, day_type) if health_content else "(health plan unavailable)"
 
