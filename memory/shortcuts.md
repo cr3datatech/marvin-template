@@ -38,7 +38,7 @@ Shortcuts are trigger words or phrases. Append `/` to trigger via the bots (e.g.
 
 | Shortcut | Action |
 |----------|--------|
-| `cr3data` | Pull a live snapshot of all Cr3Data-related work: Tourno Jira (TF) active tickets by status (To Do + In Progress), recent Confluence pages in the tourno space, open threads from state files related to Cr3Data, and call `calendar_list_events` with days_ahead=7 to show upcoming calendar events for the next 7 days. |
+| `cr3data` | Pull a live snapshot of all Cr3Data-related work: Tourno Jira (TF) active tickets by status (To Do + In Progress), recent Confluence pages in the tourno space, the Open Threads section from `state/current.md`, and call `calendar_list_events` with days_ahead=7 to show upcoming calendar events for the next 7 days. |
 
 ---
 
@@ -46,7 +46,7 @@ Shortcuts are trigger words or phrases. Append `/` to trigger via the bots (e.g.
 
 | Shortcut | Action |
 |----------|--------|
-| `tourno` | Find the active Jira sprint in the TF project using `list_jira_sprints`. Then fetch all tickets in that sprint using `list_jira_tickets` or `search_jira_tickets`. Group and display them by status: To Do, In Progress, In Review, Done/Closed. Show ticket key, summary, and assignee for each. |
+| `tourno` | Find the active Jira sprint in the TF project using `list_jira_sprints`. Fetch all tickets in that sprint and group by status: To Do, In Progress, In Review, Done/Closed — show ticket key and summary for each. Also call `list_bitbucket_pipelines` for the `tourno` repo (Cr3Data workspace) and show the status of the last 5 pipeline runs. |
 
 ---
 
