@@ -95,6 +95,42 @@ def select_model(message: str) -> str:
     return HAIKU
 
 
+def resolve_shortcut(message: str, groot_root: Path) -> str | None:
+    """If message is 'word/', look it up in memory/shortcuts.md and return a pre-built prompt."""
+    match = re.match(r'^([a-zA-Z][a-zA-Z0-9_-]*)/$', message.strip())
+    if not match:
+        return None
+    keyword = match.group(1).lower()
+
+    shortcuts_path = groot_root / "memory" / "shortcuts.md"
+    if not shortcuts_path.exists():
+        return None
+
+    row = re.search(
+        rf'\|\s*`{re.escape(keyword)}`\s*\|\s*(.+?)\s*\|',
+        shortcuts_path.read_text(),
+    )
+    if not row:
+        return None
+
+    instruction = row.group(1).strip()
+
+    # Pre-load any .md file references so Claude doesn't need tools
+    file_refs = re.findall(r'`([a-zA-Z0-9_/.-]+\.md)`', instruction)
+    sections = []
+    for ref in file_refs:
+        path = groot_root / ref
+        if path.exists():
+            sections.append(f"### {ref}\n\n{path.read_text()}")
+
+    today = datetime.now()
+    prompt = f"Today is {today.strftime('%A, %Y-%m-%d')}.\n\n"
+    if sections:
+        prompt += "\n\n".join(sections) + "\n\n"
+    prompt += f"Task: {instruction}\n\nRespond concisely."
+    return prompt
+
+
 def build_prompt(user_message: str, history: list) -> str:
     """Inject SQLite conversation history into a prompt for stateless CLI calls."""
     if not history:

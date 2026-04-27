@@ -27,7 +27,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import build_prompt, daily_briefing, select_model
+from model_client import HAIKU, build_prompt, daily_briefing, resolve_shortcut, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -273,6 +273,18 @@ After delivering everything, ask: "Which influence play do you want to pair with
 
         return prompt
 
+    def run_shortcut(self, prompt: str) -> str:
+        try:
+            result = subprocess.run(
+                ["claude", "-p", prompt, "--model", HAIKU, "--output-format", "text", "--no-session-persistence"],
+                capture_output=True, text=True, timeout=60, cwd=str(GROOT_ROOT),
+            )
+            return result.stdout.strip() or "Done." if result.returncode == 0 else "Shortcut failed."
+        except subprocess.TimeoutExpired:
+            return "Shortcut timed out."
+        except Exception as e:
+            return f"Shortcut error: {e}"
+
     def generate_response(self, user_message: str, channel_id: str) -> str:
         history = self.store.get_history(channel_id)
         model = select_model(user_message)
@@ -338,6 +350,11 @@ def main():
 
         if user_message.lower() == "daily":
             say(daily_briefing(GROOT_ROOT))
+            return
+
+        shortcut_prompt = resolve_shortcut(user_message, GROOT_ROOT)
+        if shortcut_prompt:
+            say(groot.run_shortcut(shortcut_prompt))
             return
 
         if user_message.lower() in ["status", "/status"]:

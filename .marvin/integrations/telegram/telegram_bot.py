@@ -34,7 +34,7 @@ from telegram.ext import (
 )
 
 sys.path.insert(0, str(SCRIPT_DIR.parent / "shared"))
-from model_client import build_prompt, daily_briefing, select_model
+from model_client import HAIKU, build_prompt, daily_briefing, resolve_shortcut, select_model
 
 # Configure logging
 logging.basicConfig(
@@ -387,6 +387,13 @@ When researching for a Confluence page:
 
         chat_id = update.effective_chat.id
         user_message = update.message.text
+
+        shortcut_prompt = resolve_shortcut(user_message, MARVIN_ROOT)
+        if shortcut_prompt:
+            await update.message.chat.send_action("typing")
+            response = self._run_claude(shortcut_prompt, HAIKU, timeout=60)
+            await update.message.reply_text(response)
+            return
 
         self.store.add_message(chat_id, "user", user_message)
         await update.message.chat.send_action("typing")
