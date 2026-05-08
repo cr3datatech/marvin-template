@@ -45,9 +45,25 @@
 
 | Metric | Value |
 |--------|-------|
-| Daily caloric expenditure | 2,406 kcal |
+| Daily caloric expenditure (calculated) | 2,406 kcal |
 | Resting metabolic rate | ~1,861 kcal |
 | Activity multiplier | 1.29x (moderate activity) |
+| **Actual TDEE (with Hyrox 4x/week)** | **~2,550–2,700 kcal/day** |
+
+---
+
+## Activity Schedule
+
+### Weekly Training
+- **Monday evening:** Hyrox session (~400–500 kcal)
+- **Wednesday evening:** Hyrox session (~400–500 kcal)
+- **Thursday evening:** Hyrox session (~400–500 kcal)
+- **Saturday morning:** Hyrox session (~400–500 kcal)
+- **Once/week:** Padel tennis
+- **1–2x/week:** Golf (walking, not driving)
+- **Daily:** Walk or cycle to gym, padel, golf, commuting
+
+**Total weekly activity beyond baseline:** ~3,500–4,800 kcal
 
 ---
 
@@ -62,18 +78,20 @@
 3. Preserves strength and metabolism
 
 ### Phase 1: Foundation (Weeks 1–4)
-- **Nutrition:** Start at maintenance (2,400 kcal) with high protein (150g+/day, ~1.6g per kg target weight)
+- **Nutrition:** Start at maintenance (~2,500 kcal) with high protein (150g+/day)
 - **Resistance training:** 3–4x/week, compound focus (squats, deadlifts, bench, rows)
-- **Cardio:** 2–3x/week, 30–40 min moderate intensity (walking, cycling)
+- **Cardio:** Already covered by Hyrox 4x/week + padel + golf + daily walking
 - **Sleep:** 7–9 hours — critical for muscle recovery and hormonal balance
 
 **Why maintenance first?** At 51, your hormones are sensitive. A gentle start ensures you don't crash energy/testosterone.
 
 ### Phase 2: Controlled Deficit (Weeks 5–16)
-- **Nutrition:** 2,000–2,100 kcal/day (300–400 kcal deficit)
+- **Nutrition:** 2,200–2,300 kcal/day (250–350 kcal deficit from actual TDEE)
 - **Protein:** 150g/day (non-negotiable)
-- **Resistance training:** Same 3–4x/week
-- **Cardio:** Add 1–2 sessions; focus on visceral fat reduction (brisk walking, incline work)
+- **Hyrox:** Continue 4x/week
+- **Resistance training:** 3–4x/week alongside Hyrox
+
+**⚠️ Important:** You can't fuel Hyrox 4x/week + daily walking/cycling on 2,050 kcal. Bump to 2,200–2,300. If you feel sluggish, add another 50–100g carbs.
 
 **Expected progress:**
 - Weeks 5–8: Lose 2–3 kg fat, gain 1–1.5 kg muscle
@@ -82,7 +100,7 @@
 ### Phase 3: Sustainability (Week 17+)
 - Transition to maintenance with high protein
 - Shift focus to strength gains (lift heavier, not lighter)
-- Maintain cardio but reduce frequency if hitting goals
+- Maintain Hyrox + cardio but adjust frequency if needed
 
 ---
 
@@ -111,36 +129,28 @@
 
 ---
 
-## Notes
-- InBody Score of 76/100 is solid — you're not starting from a crisis, just need refinement
-- Visceral fat is the priority (worse than subcutaneous fat for health)
-- At 51, hormones matter — avoid extreme dieting; prioritize sleep and consistency
-- Recomposition takes 16–24 weeks; don't expect linear progress
-
----
-
 ## Nutrition Plan
 
-### Daily Targets (Phase 2 — 2,000–2,100 kcal)
+### Daily Targets (Phase 2 — 2,200–2,300 kcal for Hyrox intensity)
 
 | Macro | Grams | Calories | % of Total |
 |-------|-------|----------|-----------|
-| **Protein** | 150g | 600 kcal | 30% |
-| **Carbs** | 225–250g | 900–1,000 kcal | 45–48% |
-| **Fat** | 55–70g | 500–630 kcal | 22–25% |
+| **Protein** | 150g | 600 kcal | 27% |
+| **Carbs** | 250–270g | 1,000–1,080 kcal | 45–48% |
+| **Fat** | 60–70g | 540–630 kcal | 24–27% |
 | **Fiber** | 30–35g | (included in carbs) | — |
 
 **Why these numbers?**
 - Protein (150g = 1.6g per kg target body weight) → preserves muscle during deficit
-- Carbs (225–250g) → enough for training energy and satiety
-- Fat (55–70g) → hormone production, nutrient absorption
+- Carbs (250–270g) → enough for Hyrox + daily activity + strength training
+- Fat (60–70g) → hormone production, nutrient absorption
 - Fiber (30–35g) → visceral fat reduction, hunger control, cardiovascular health
 
 ---
 
 ### Sample Daily Eating Plan
 
-**Goal: 2,050 kcal, 150g protein, 245g carbs, 65g fat**
+**Goal: 2,250 kcal, 150g protein, 260g carbs, 65g fat**
 
 #### Breakfast (7:00 AM) — 550 kcal, 35g protein
 - 3 whole eggs + 1 cup egg whites (scrambled or omelet)
@@ -161,24 +171,24 @@
 ---
 
 #### Lunch (12:30 PM) — 550 kcal, 45g protein
-- 180g grilled chicken breast or lean beef (90g protein per 100g raw)
-- 180g white or brown rice (cooked)
+- 180g grilled chicken breast or lean beef
+- 200g white or brown rice (cooked)
 - 100g steamed broccoli
 - 1 tbsp olive oil (for cooking/drizzling)
 
-**Macros:** 45g protein, 70g carbs, 13g fat
+**Macros:** 45g protein, 75g carbs, 13g fat
 
 ---
 
-#### Afternoon Snack (3:30 PM) — 200 kcal, 20g protein
-- Greek yogurt (150g, 0% fat) with 25g granola
-- Handful of berries
+#### Pre-Hyrox Snack (60–90 min before session) — 200 kcal, 15g protein
+- Banana + 25g whey protein shake, OR
+- Toast + honey + small Greek yogurt
 
-**Macros:** 20g protein, 25g carbs, 2g fat
+**Macros:** 15g protein, 35g carbs, 2g fat
 
 ---
 
-#### Dinner (7:00 PM) — 550 kcal, 50g protein
+#### Dinner (7:00 PM, post-Hyrox on training days) — 550 kcal, 50g protein
 - 200g salmon or white fish (oven-baked)
 - 150g sweet potato (baked)
 - 100g asparagus or green beans
@@ -188,9 +198,9 @@
 
 ---
 
-#### Evening (9:00 PM, optional) — 100 kcal, 10g protein
-- Casein protein shake: 25g casein powder + 250ml almond milk
-- OR Greek yogurt (100g)
+#### Evening (optional, 9:00 PM) — 100 kcal, 10g protein
+- Casein protein shake: 25g casein powder + 250ml almond milk, OR
+- Greek yogurt (100g)
 
 **Macros:** 10g protein, 5g carbs, 4g fat
 
@@ -203,7 +213,7 @@
 - Eggs, cottage cheese, Greek yogurt, whey protein
 - Legumes (black beans, lentils, chickpeas) — also provide carbs
 
-**Carb Sources (aim for 40–80g per meal)**
+**Carb Sources (aim for 60–80g per meal, higher on Hyrox days)**
 - Rice (white, brown, jasmine), oats, sweet potatoes, regular potatoes
 - Bread (whole grain preferred), pasta, quinoa
 - Fruits: banana, apple, orange, berries, melon
@@ -226,15 +236,16 @@
 
 **Water:**
 - Minimum: 3 liters/day
-- During training: Add 500ml per 30 min of exercise
+- During Hyrox/training: Add 500ml per 30 min of exercise
 - Rule of thumb: Clear to pale yellow urine = hydrated
 
-**Key Supplements (optional but helpful):**
+**Key Supplements:**
 - **Whey protein powder** — convenient, hits daily protein target
-- **Multivitamin** — fills micro gaps (especially at deficit)
+- **Vitamin D3** — Finland in winter, likely deficient
+- **Creatine monohydrate** — 5g/day, boosts strength and muscle (evidence-backed for 51+)
+- **Magnesium** — sleep + recovery
 - **Omega-3 (fish oil or algae)** — anti-inflammatory, supports visceral fat reduction
-- **Creatine monohydrate** — 5g/day, boosts strength and muscle (evidence-backed)
-- **Caffeine** — pre-workout energy (150–200mg safe for most people)
+- **Multivitamin** — fills micro gaps (especially at deficit)
 
 **Not necessary:**
 - Fat burners, BCAAs, expensive "metabolism boosters" — waste of money
@@ -280,7 +291,7 @@
 **Energy check:**
 - Morning: Should feel rested and ready
 - Mid-afternoon: Slight hunger is OK; true fatigue = deficit too aggressive
-- Post-workout: Should recover within 24h
+- Post-Hyrox: Should recover within 24h
 
 **Monthly adjust:**
 - Reweigh food portions (scale creep happens)
@@ -291,8 +302,8 @@
 ### Why This Works for Your Goals
 
 1. **High protein** → Preserves muscle while losing fat, keeps you full
-2. **Moderate carbs** → Enough for training energy and hormonal health (important at 51)
-3. **Moderate fat** → Supports testosterone and hormone production
+2. **Moderate carbs** → Enough for Hyrox 4x/week + daily activity
+3. **Moderate fat** → Supports testosterone and hormone production at 51
 4. **Fiber-rich foods** → Directly targets visceral fat reduction
 5. **Consistent eating times** → Improves hormonal response and adherence
 6. **Trackable, simple** → You'll stick to it
@@ -302,21 +313,80 @@
 ### Common Mistakes to Avoid
 
 ❌ **Don't:** Go very low-fat or low-carb → Hormonal crash, muscle loss, unsustainable
-❌ **Don't:** Skip meals or intermittent fast aggressively → Muscle loss, energy crash
-❌ **Don't:** Eat "clean" but unmeasured amounts → You'll overshoot calories
-❌ **Don't:** Change multiple things at once → Can't tell what's working
-✅ **Do:** Measure portions for 2–4 weeks, then you can eyeball it
-✅ **Do:** Eat mostly whole foods, but enjoy treats at 80/20 ratio
-✅ **Do:** Drink water, sleep well — these matter as much as calories
+❌ **Don't:** Eat random snacks → Lose track of macros, easy to overeat junk
+❌ **Don't:** Skip protein at a meal → Harder to hit daily target, less satiety
+❌ **Don't:** Train fasted on Hyrox days → Suboptimal performance, increased muscle breakdown
+❌ **Don't:** Be rigid → If you hate salmon, swap for chicken. Consistency > perfection
+✅ **Do:** Prep Sunday and Wednesday → Takes 90 min total, ensures adherence
+✅ **Do:** Hit protein first → Everything else falls into place
+✅ **Do:** Adjust carbs on high-activity days → Hyrox days need more fuel
+✅ **Do:** Eat the same meals 2–3x/week → Reduces decision fatigue
 
 ---
 
-### Next Steps
+## Weekly Mission Template
 
-1. **Pick a tracking app** (MyFitnessPal free version is fine)
-2. **Go grocery shopping** with the food list above
-3. **Prep Sunday** — cook chicken, rice, chop veggies
-4. **Start Monday** — follow the sample plan above (adjust to your taste)
-5. **Check-in Week 2:** How's adherence? Energy? Any hunger spikes?
+### Hyrox + Activity Nutrition Guidelines
 
-**Questions?** Ask me to adjust portions, swap foods, or build a different meal rotation.
+**Monday / Wednesday / Thursday Evening (Hyrox)**
+- Breakfast: Greek yogurt or skyr, oats or granola, berries
+- Lunch: Chicken/turkey/beef, rice or potatoes, vegetables, olive oil
+- Pre-Hyrox (60–90 min before): Banana + protein shake
+- Dinner (biggest meal): Lean protein, rice/potatoes/pasta, vegetables
+- Late snack (optional): Cottage cheese / skyr / protein shake
+
+**Saturday Morning (Hyrox)**
+- Pre-workout: Banana or toast + honey, optional protein shake
+- Post-workout (big meal): Eggs + toast + fruit, or chicken + rice
+- Lunch: Salmon + potatoes + veggies (protein + carbs + fats)
+- Dinner: Protein-focused, moderate carbs (e.g. steak + salad + potatoes)
+
+**Padel Day (Once/week)**
+- Treat like a Hyrox day — high protein, adequate carbs, good hydration
+
+**Golf Day (1–2x/week, walking)**
+- Breakfast: Protein + carbs
+- Lunch: Pre-golf meal, moderate carbs
+- Dinner: Protein + vegetables + some fats (lower carbs than Hyrox days)
+
+**Lower Activity Days**
+- Breakfast: Eggs + avocado, or yogurt + nuts
+- Lunch: Protein + vegetables + fats, minimal carbs
+- Dinner: Protein + vegetables + some fats
+- Optional treat: Keep it small and controlled
+
+---
+
+## Active Missions
+
+> Based on InBody results — 24 Apr 2026 (starting weight: 93.9 kg)
+
+| # | Mission | Target | Status |
+|---|---------|--------|--------|
+| 1 | Drop to 88 kg | 88.0 kg | 🔴 In Progress |
+| 2 | Drop to 85 kg | 85.0 kg | 🔴 Future |
+| 3 | Reduce visceral fat | <100 cm² | 🔴 Primary focus |
+| 4 | Reduce waist circumference | -2–3 cm every 4 weeks | 🔴 In Progress |
+
+---
+
+## Core Principles
+
+* Consistency beats perfection
+* Small daily habits compound
+* Recovery is as important as effort
+* Energy management > motivation
+* Respect your body's signals
+* Protein at every meal
+* Carbs follow effort
+
+---
+
+## Identity Anchor
+
+"I stay healthy because it makes everything else possible."
+
+---
+
+**Last Updated:** May 8, 2026
+**Next Review:** May 22, 2026 (2-week check-in)
