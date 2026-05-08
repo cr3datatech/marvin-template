@@ -22,7 +22,7 @@ Shortcuts are trigger words or phrases. Append `/` to trigger via the bots (e.g.
 
 | Shortcut | Action |
 |----------|--------|
-| `daily` | Read `state/current.md`, `state/goals.md`, and `memory/health.md`. Get today's date and day. Also call `calendar_list_events` with days_ahead=7 to fetch upcoming calendar events. Present: (1) this week's focus areas from current.md (Cr3Data, Tourno, CGI — everything before the first ---); (2) cert goals from goals.md — always show each cert with its current status even if parked; (3) today's meal plan from health.md based on the day type; (4) upcoming calendar events for the next 7 days. Keep it concise. |
+| `daily` | Read `state/current.md`, `state/goals.md`, and `memory/health.md`. Get today's date and day. Call `calendar_list_events` with days_ahead=7 to fetch upcoming calendar events. Find the active Jira sprint in the TF project, fetch all non-closed tickets in that sprint, and show them grouped by status. Present: (1) **This week's focus** from current.md (first section before the first ---); (2) **Certifications status** — show each cert with its current status (Active/Parked/In Progress) and the primary resource/next step: AWS CloudOps (Active), AWS AI Developer Professional (Parked), Azure AI Developer (Parked), AI Mastery (Parked); (3) **Today's eating plan** from health.md based on the day type; (4) **Tourno current sprint — non-closed tickets by status** (live, excluding closed); (5) **Upcoming calendar events** for the next 7 days. Keep it concise and scannable. |
 
 ---
 
