@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); p=d.get('prompt',''); print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"MANDATORY for /start: Your FIRST tool call MUST be mcp__groot-tools__get_current_datetime. Do not call Read, Bash, Skill, or any other tool before get_current_datetime. No exceptions.\\\"}}') if '/start' in p else None\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
