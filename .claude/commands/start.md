@@ -18,10 +18,17 @@ Run `date +%Y-%m-%d` to get today's date. Store as TODAY.
 - `sessions/{TODAY}.md` - If exists, we're resuming today's session
 - If no today file, read the most recent file in `sessions/` for continuity
 
-### 3. Present Briefing
+### 3. Fetch Live Jira Tickets
+Query Jira for the current open sprint tickets in the Tourno project:
+- Use `mcp__groot-tools__search_jira_tickets` or `mcp__atlassian__searchJiraIssuesUsingJql` with JQL: `project = TF AND sprint in openSprints() ORDER BY status ASC`
+- Group results by status (To Do / In Progress / In Review / etc.)
+- Update the Tourno sprint section in `state/current.md` with the live data (replace the static ticket list)
+
+### 4. Present Briefing
 Give a concise briefing:
 - Date and day of week
 - Top priorities from state/current.md
+- Live Jira sprint status (from step 3)
 - Progress toward goals
 - Any open threads or items needing attention
 - Ask how to help today

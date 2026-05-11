@@ -16,9 +16,9 @@ Last updated: 2026-05-11
 - Kubernetes (AWS + Azure)
 
 ### Tourno — SHIP
-**In Progress:**
-- **TF-427** — Dashboard "small changes" (needs clarity on what changes)
-- **TF-429** — Spinner keeps running with no invitations (UX decision needed)
+**Active Sprint (Non-Closed):**
+- **TF-441** — Use Playwright to test Tourno flows (To Do)
+- **TF-407** — Marketing tourno (To Do)
 
 ---
 
@@ -40,7 +40,7 @@ Last updated: 2026-05-11
 
 ### Tourno (Cr3Data)
 - **Company:** Cr3Data
-- Q1 2026 sprint active — 2 tickets In Progress, 3 To Do
+- Q1 2026 sprint active — 2 tickets To Do (TF-441, TF-407)
 - Jira project: `TF` | Confluence: `tourno`
 - Bitbucket: Cr3Data workspace
 - See `memory/project_tourno_jira.md`
@@ -59,7 +59,7 @@ Last updated: 2026-05-11
 - **2026-04-27**: LinkedIn post — SW Dev Bottleneck published ✅
 - **2026-04-26**: Added LinkedIn post task (SW Dev Bottleneck) to Cr3Data Craig week
 - **2026-04-26**: Added exec presence schema reevaluation to Cr3Data Craig week
-- **2026-04-26**: Week scoped — Alpaca API build, TF-427/429 In Progress, CrowdStrike/Kubernetes deliverables
+- **2026-04-26**: Week scoped — Alpaca API build, TF-427/429 now closed, CrowdStrike/Kubernetes deliverables
 - **2026-04-09**: Fixed bot errors — ANTHROPIC_API_KEY commented out (bots now use Pro plan). allowedTools wildcard fixed. Google Calendar re-authenticated (refresh token — no future expiry).
 - Tourno error log automation built: Drive folders created, cron running Tue/Thu 9am, email to support@tourno.fi, files renamed after processing
 - Full Groot setup completed 2026-03-17

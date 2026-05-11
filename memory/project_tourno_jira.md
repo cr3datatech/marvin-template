@@ -1,38 +1,16 @@
 ---
 name: tourno_jira_sprint
-description: Tourno Q1 2026 Jira sprint tickets, organised by status
+description: Tourno Jira project metadata — tickets are fetched live on /start, not stored here
 type: project
+originSessionId: 9ebe1cab-7bb4-4dc9-acfa-d816570be088
 ---
-
-# Tourno — Jira Sprint: Q1 2026 (Sprint ID: 162)
+# Tourno — Jira Project
 
 Project key: `TF` | Board ID: `6` | Instance: `https://cr3data.atlassian.net`
 
-## To Do
+Ticket data is fetched live at `/start` using JQL: `project = TF AND sprint in openSprints() ORDER BY status ASC`
 
-| Key | Summary | Priority |
-|-----|---------|----------|
-| TF-429 | dashboard changes | High |
-| TF-427 | small changes | Medium |
-| TF-406 | AI integration | Medium |
-| TF-407 | Marketing tourno | Medium |
-| TF-423 | Dashboard KPIs | Medium |
+Do not rely on this file for ticket status — always query Jira directly.
 
-## Implementation
-
-_(none currently)_
-
-## Closed
-
-| Key | Summary | Priority |
-|-----|---------|----------|
-| TF-428 | Invitations manage | High |
-| TF-430 | Invitation emails | Medium |
-| TF-431 | duplicate emails sent | High |
-| TF-432 | excel ingest | Medium |
-| TF-433 | Pre visible check | Medium |
-| TF-434 | ai failed email check | Medium |
-| TF-435 | failed email check | Medium |
-
-**Why:** Jira is a work intake source for Tourno. Groot queries it via REST API (basic auth with craig@rothwell.fi).
-**How to apply:** Use this as context when discussing Tourno work, priorities, and sprint progress.
+**Why:** Static ticket snapshots go stale quickly. Live fetch ensures the briefing reflects actual sprint state.
+**How to apply:** When discussing Tourno work, use the live data from the most recent `/start` or query Jira directly.
