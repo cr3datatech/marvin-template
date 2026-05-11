@@ -1,31 +1,24 @@
 # Current State
 
-Last updated: 2026-04-27
+Last updated: 2026-05-11
 
-## This Week (Apr 26 - May 2)
+## This Week (May 11 - May 17)
 
-### Cr3Data Craig — BUILD
-**Focus:** Alpaca API issues (trader)
-- Proof/artifact for the week
-- Sort out integration problems
-- Publish-ready by end of week (LinkedIn post)
-
-**Also this week:**
-- ~~Publish LinkedIn post — SW Dev Bottleneck~~ ✅ **DONE** (2026-04-27)
-- Reevaluate the exec presence schema
-
-### Tourno — SHIP
-**In Progress (2):**
-- **TF-427** — Dashboard "small changes" (needs clarity on what changes)
-- **TF-429** — Spinner keeps running with no invitations (UX decision needed)
+### Certs — STUDY
+**Focus:** AWS CloudOps Engineer - Associate (exam May 27)
+- Study plan: 18 × 2-hour sessions across May 11–27
+- Week 1 target: S3 (EC2 remaining 16 lessons) + S4 (AMI, 9 lessons) + S5 (SSM, 20 lessons) — ~6h
+- Currently: S3 in progress (2/18 done)
 
 ### CGI — DELIVER
 **Active:**
 - CrowdStrike (AWS + Azure)
 - Kubernetes (AWS + Azure)
 
-### Certs
-- **Parked** — no active study this week
+### Tourno — SHIP
+**In Progress:**
+- **TF-427** — Dashboard "small changes" (needs clarity on what changes)
+- **TF-429** — Spinner keeps running with no invitations (UX decision needed)
 
 ---
 
@@ -39,9 +32,10 @@ Last updated: 2026-04-27
 - This week: CrowdStrike + Kubernetes for AWS/Azure
 
 ### Professional Development
+- **AWS CloudOps Engineer - Associate** — ACTIVE, exam May 27
 - AWS AI Developer Professional cert — parked
 - Azure AI Architect cert — parked
-- See `state/professional-dev.md`
+- See `state/professional-dev.md` / `state/cert-cloudops-associate.md`
 - Confluence: `CLOUD` (Cr3Data)
 
 ### Tourno (Cr3Data)
@@ -61,6 +55,7 @@ Last updated: 2026-04-27
 
 ## Recent Context
 
+- **2026-05-11**: CloudOps study plan locked in — 9-week schedule, 18 sessions, exam booked May 27 @ 07:00
 - **2026-04-27**: LinkedIn post — SW Dev Bottleneck published ✅
 - **2026-04-26**: Added LinkedIn post task (SW Dev Bottleneck) to Cr3Data Craig week
 - **2026-04-26**: Added exec presence schema reevaluation to Cr3Data Craig week
