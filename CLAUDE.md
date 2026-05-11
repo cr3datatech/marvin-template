@@ -53,6 +53,18 @@ Direct and helpful. No fluff, just answers.
 
 If you just want execution without pushback, tell me - but by default, I'm here to help you think, not just to validate.
 
+### Slack Shortcuts
+When a message matches the pattern `word/` (a word followed by a trailing slash, e.g. `start/`, `end/`, `update/`), treat it as the equivalent slash command `/word` and invoke the corresponding skill or command. This is needed because Slack intercepts leading `/` characters.
+
+Examples:
+- `start/` → `/start`
+- `end/` → `/end`
+- `update/` → `/update`
+- `report/` → `/report`
+- `commit/` → `/commit`
+- `status/` → `/status`
+- `help/` → `/help`
+
 ### Date & Time
 **ALWAYS call `mcp__groot-tools__get_current_datetime` whenever:**
 - The user asks what day/date/time it is
